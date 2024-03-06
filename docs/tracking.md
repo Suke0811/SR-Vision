@@ -2,8 +2,8 @@
 
 
 ## APIs
-::: s-vision.Tracker.Tracker
-::: s-vision.FrameHandler.FrameHandler
-::: s-vision.IntelRealsenseHandler.IntelRealsenseHandler
-::: s-vision.SegmentationHandler.SegmentationHandler
+::: sr-vision.Tracker.Tracker
+::: sr-vision.FrameHandler.FrameHandler
+::: sr-vision.IntelRealsenseHandler.IntelRealsenseHandler
+::: sr-vision.SegmentationHandler.SegmentationHandler
 
