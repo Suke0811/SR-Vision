@@ -1,4 +1,4 @@
-# S.Vision
+# SR.Vision
 
 
 
@@ -6,7 +6,7 @@
 ## Installation
 this library is pip installable
 ```bash
-pip install s-vision
+pip install sr-vision
 ```
 
 ### Dev Install
@@ -24,9 +24,9 @@ Hence, this library requires pyrealsense2 earlier than Ver. 2.53.1
 
 ## Documentation
 For the latest documentation, please visit
-[https://suke0811.github.io/s-vision/](https://suke0811.github.io/Localization_T265/)
+[https://suke0811.github.io/s-vision/](https://suke0811.github.io/s-vision/)
 
-[![Latest Documentation](https://github.com/Suke0811/Localization_T265/actions/workflows/ci.yml/badge.svg)](https://github.com/Suke0811/Localization_T265/actions/workflows/ci.yml)
+[![Latest Documentation](https://github.com/Suke0811/s-vision/actions/workflows/ci.yml/badge.svg)](https://github.com/Suke0811/Localization_T265/actions/workflows/ci.yml)
 
 
 

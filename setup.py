@@ -14,15 +14,15 @@ with open('requirements.txt') as f:
 
 
 setup(
-    name='s.vision',
-    version='0.1.0',
+    name='sr-vision',
+    version='0.0.0',
     description='Segment and Track Object Location',
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
     author='Alvin Zhu, Yusuke Tanaka',
     license='LGPLv3',
     project_urls={'GitHub':'https://github.com/Suke0811/S-Vision'},
-    packages=find_packages(include=['s-vision', 's-vision.*']),
+    packages=find_packages(include=['sr-vision', 'sr-vision.*']),
     install_requires=requirements,
     classifiers=[
         'Development Status :: 4 - Beta',
