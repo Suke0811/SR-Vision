@@ -2,14 +2,23 @@ from Base import SegmentationHandlerBase
 import cv2
 import pyrealsense2
 import numpy as np
-import pathlib
+import pathlib as Path
 import torch
 import time
+from ultralytics import YOLO
 
 
 class SegmentationHandler(SegmentationHandlerBase):
-    def __init__(self):
-        self.model 
+    def __init__(self, model_path):
+        self.base_dir = Path(__file__).resolve().parent.parent.parent
+        self.model_path = model_path
+        self.model = YOLO(self.model_path)
+        self.classes = ['Door Handle', 'Door Knob']
+        
+        self.frame = None
+        self.point_cloud = None
+        
+        self.results = None
         
     def get_depth_at_centroid_seg(self, polygon):
         # Calculate the centroid
@@ -30,6 +39,9 @@ class SegmentationHandler(SegmentationHandlerBase):
             return z, x, -y, center_x, center_y
         else:
             return None, 0, 0, 0, 0
+    
+    def process_model(self):
+        self.results = self.model(self.frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf)
     
     # Main function to run the model
     def run_model(self):
