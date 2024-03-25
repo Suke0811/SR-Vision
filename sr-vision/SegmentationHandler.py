@@ -9,16 +9,22 @@ from ultralytics import YOLO
 
 
 class SegmentationHandler(SegmentationHandlerBase):
-    def __init__(self, model_path):
+    def __init__(self, model_path, log, display):
+        # init model variables
         self.base_dir = Path(__file__).resolve().parent.parent.parent
         self.model_path = model_path
         self.model = YOLO(self.model_path)
         self.classes = ['Door Handle', 'Door Knob']
+        self.results = None
         
+        # init camera variables
         self.frame = None
         self.point_cloud = None
         
-        self.results = None
+        # segmentation flags
+        self.log = log
+        self.display = display
+        
         
     def get_depth_at_centroid_seg(self, polygon):
         # Calculate the centroid
@@ -44,7 +50,24 @@ class SegmentationHandler(SegmentationHandlerBase):
         self.results = self.model(self.frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf)
     
     # Main function to run the model
-    def run_model(self):
+    def segmentation(self):
+        # run inference on frame
+        self.process_model()
+        # initialize 2D Matrix for positions of detected objects
+        self.positions = np.empty((0, 4), dtype=np.float32)
+        
+        # extract the single inference from results
+        if self.results is not None:
+            for inference in self.results:
+                result = inference
+                
+        if result.boxes and result.masks:
+            for box, mask in zip(result.boxes, result.masks):
+                
+        
+        
+        
+# ------------------------------------------------ 
         process_model_time = time.time()  # Capture start time
         self.process_model()
         # refresh positions every cycle
@@ -85,16 +108,6 @@ class SegmentationHandler(SegmentationHandlerBase):
                     else:
                         position = (cls, x, y, depth)
                         self.positions.append(position)
-
-        # flipping the y axis, not sure why yet
-                    kf_center_3d = [x, -y, depth]
-
-                    # kalman filter stuff
-                    # self.current_time = time.time()
-                    # dt = self.current_time - self.last_time  # Time elapsed since last measurement
-                    # self.last_time = self.current_time
-                    # # Kalman Filter update and prediction
-                    # self.process_kalman(kf_center_3d, dt)
                     
                     if (self.display):
                         # display data on frame
