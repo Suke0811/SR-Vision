@@ -1,6 +1,6 @@
 from Base import SegmentationHandlerBase
 import cv2
-import pyrealsense2
+import pyrealsense2 as rs
 import numpy as np
 import pathlib as Path
 import torch
@@ -11,7 +11,7 @@ from ultralytics import YOLO
 class SegmentationHandler(SegmentationHandlerBase):
     def __init__(self, model_path, log, display):
         # init model variables
-        self.base_dir = Path(__file__).resolve().parent.parent.parent
+        self.base_dir = Path(__file__).resolve().parent
         self.model_path = model_path
         self.model = YOLO(self.model_path)
         self.classes = ['Door Handle', 'Door Knob']
@@ -25,6 +25,10 @@ class SegmentationHandler(SegmentationHandlerBase):
         self.log = log
         self.display = display
         
+        # init processing variables
+        self.bbox = None
+        self.mask = None
+        
         
     def get_depth_at_centroid_seg(self, polygon):
         # Calculate the centroid
@@ -36,13 +40,21 @@ class SegmentationHandler(SegmentationHandlerBase):
             return None, 0, 0
 
         # Get depth value at centroid
-        error, point3D = self.point_cloud.get_value(center_x, center_y)
-        if self.err == sl.ERROR_CODE.SUCCESS:
-            x = point3D[0]
-            y = point3D[1]
-            z = point3D[2]
-            color = point3D[3]
-            return z, x, -y, center_x, center_y
+        depth_frame = self.realsense_handler.get_depth_frame()
+        if depth_frame:
+            depth_intrinsics = depth_frame.profile.as_video_stream_profile().intrinsics
+            depth_pixel = [center_x, center_y]
+            depth_in_meters = depth_frame.get_distance(depth_pixel[0], depth_pixel[1])
+
+            if depth_in_meters > 0:
+                # Convert depth pixel to 3D point in camera coordinates
+                depth_point = rs.rs2_deproject_pixel_to_point(depth_intrinsics, depth_pixel, depth_in_meters)
+                x = depth_point[0]
+                y = depth_point[1]
+                z = depth_point[2]
+                return z, -x, -y, center_x, center_y
+            else:
+                return None, 0, 0, 0, 0
         else:
             return None, 0, 0, 0, 0
     
@@ -63,6 +75,23 @@ class SegmentationHandler(SegmentationHandlerBase):
                 
         if result.boxes and result.masks:
             for box, mask in zip(result.boxes, result.masks):
+                # Extract bounding box
+                bbox = box.xyxy[0].cpu().numpy().astype(int)
+                # Extract bounding box classification
+                cls = int(box.cls[0].item())
+                # Extract confidence level
+                confidence = box.cpu().conf[0]
+                
+                # Extract segmentation mask
+                polygon = mask.xy[0]
+                
+                # 
+                
+                
+                
+                
+                
+                
                 
         
         
