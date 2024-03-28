@@ -12,6 +12,7 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
         self.config = rs.config()
         self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
         self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+        self.wait = True # use poll for frames or wait for frames
         
         # Align the two cameras since there is physical offset
         self.align_to = rs.stream.color
@@ -25,18 +26,34 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
         self.color_image = None
         
     def start_camera(self):
-        pass
+        # Start the pipeline
+        self.profile = self.pipeline.start(self.config)
+        # Get the camera intrinsics from the color stream
+        self.intrinsics = self.profile.get_stream(rs.stream.color).as_video_stream_profile().get_intrinsics()
+
     
     def stop_camera(self):
-        pass
+        # Stop the pipeline
+        self.pipeline.stop()
     
-    def get_frames(self, wait=True):
+    '''Getters:'''
+    
+    def get_color_frame(self):
+        return self.color_image
+    
+    def get_depth_frame(self):
+        return self.depth_image
+    
+    def get_intrinsics(self):
+        return self.intrinsics
+    
+    def get_frames(self):
         try:
             # Attempt to retrieve the next set of frames
-            if wait:
-                frames = self.pipeline.poll_for_frames()
-            else:
+            if self.wait:
                 frames = self.pipeline.wait_for_frames()
+            else:
+                frames = self.pipeline.poll_for_frames()
                 
             # Check if frames are available
             if frames:
@@ -60,3 +77,5 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
         except KeyboardInterrupt:
             self.stop_camera()
         
+    '''Setters:'''
+    

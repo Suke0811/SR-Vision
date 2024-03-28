@@ -9,17 +9,22 @@ from ultralytics import YOLO
 
 
 class SegmentationHandler(SegmentationHandlerBase):
-    def __init__(self, model_path, log, display):
+    def __init__(self, model_path, log, display, max_model_size=640, det_conf=0.1, *args, **kwargs):
         # init model variables
         self.base_dir = Path(__file__).resolve().parent
         self.model_path = model_path
         self.model = YOLO(self.model_path)
         self.classes = ['Door Handle', 'Door Knob']
         self.results = None
+        self.max_model_size = max_model_size
+        self.det_conf = det_conf
+        
+        # list of positions based on inference results
+        self.positions = np.empty((0, 4), dtype=np.float32)
         
         # init camera variables
         self.frame = None
-        self.point_cloud = None
+        self.depth_frame = None
         
         # segmentation flags
         self.log = log
@@ -65,11 +70,10 @@ class SegmentationHandler(SegmentationHandlerBase):
             return None, 0, 0
 
         # Get depth value at centroid
-        depth_frame = self.realsense_handler.get_depth_frame()
-        if depth_frame:
-            depth_intrinsics = depth_frame.profile.as_video_stream_profile().intrinsics
+        if self.depth_frame:
+            depth_intrinsics = self.depth_frame.profile.as_video_stream_profile().intrinsics
             depth_pixel = [center_x, center_y]
-            depth_in_meters = depth_frame.get_distance(depth_pixel[0], depth_pixel[1])
+            depth_in_meters = self.depth_frame.get_distance(depth_pixel[0], depth_pixel[1])
 
             if depth_in_meters > 0:
                 # Convert depth pixel to 3D point in camera coordinates
@@ -77,7 +81,9 @@ class SegmentationHandler(SegmentationHandlerBase):
                 x = depth_point[0]
                 y = depth_point[1]
                 z = depth_point[2]
-                return z, -x, -y, center_x, center_y
+                # flip y so up is positive
+                # z = z - 0.0042 # slight camera offset for camera to lens protector
+                return z, x, -y, center_x, center_y
             else:
                 return None, 0, 0, 0, 0
         else:
@@ -88,8 +94,8 @@ class SegmentationHandler(SegmentationHandlerBase):
     def set_frame(self, frame):
         self.frame = frame
         
-    def set_point_cloud(self, point_cloud):
-        self.point_cloud = point_cloud
+    def set_depth_frame(self, depth_frame):
+        self.depth_frame = depth_frame
         
     def set_display(self, display):
         self.display = display
@@ -152,6 +158,7 @@ class SegmentationHandler(SegmentationHandlerBase):
         # initialize 2D Matrix for positions of detected objects
         self.positions = np.empty((0, 4), dtype=np.float32)
         
+        result = None
         # extract the single inference from results
         if self.results is not None:
             for inference in self.results:
@@ -168,7 +175,7 @@ class SegmentationHandler(SegmentationHandlerBase):
                 polygon = mask.xy[0]
                 
                 # Extract depth at centroid
-                depth, x, y, cx, cy = self.get_depth_at_centroid_seg(polygon)
+                depth, x, y, center_x, center_y = self.get_depth_at_centroid_seg(polygon)
                 position = np.array([[cls, x, y, depth]])
                 # Append position of detection to 2D Matrix
                 self.positions = np.vstack((self.positions, position))
@@ -186,64 +193,4 @@ class SegmentationHandler(SegmentationHandlerBase):
                 
         
         
-        
-# ------------------------------------------------ 
-        process_model_time = time.time()  # Capture start time
-        self.process_model()
-        # refresh positions every cycle
-        self.positions = []
-        # depth_image = self.depth_seg()
-        process_model_end_time = time.time()  # Capture end time
-        process_model_elapsed_time = process_model_end_time - process_model_time  # Calculate elapsed time
 
-        elapsed_time1 = 0
-        elapsed_time0 = 0
-
-        if self.results is not None:
-            
-            for_time = time.time()
-            for f in self.results:
-                for_end = time.time()
-                for_elapsed = for_end - for_time # Calculate elapsed time
-                result = f
-
-            start_time0 = time.time()
-            if result.boxes:
-                start_time1 = time.time()
-                for box in result.boxes:
-                    # Extract bounding box
-                    bbox = box.xyxy[0].cpu().numpy().astype(int)
-                    cls = int(box.cls[0].item())
-
-                    # get ball 3D pose estimation
-                    depth, x, y, center_x, center_y = self.get_pose_at_centroid_bbox(bbox)
-                    self.center_3d = [x, y, depth]
-
-                    if cls == 0:
-                        if not self.ball_checker(bbox, depth):
-                            continue
-                        else:
-                            position = (cls, x, y, depth)
-                            self.positions.append(position)
-                    else:
-                        position = (cls, x, y, depth)
-                        self.positions.append(position)
-                    
-                    if (self.display):
-                        # display data on frame
-                        self.display_data(box, bbox, cls, center_x, center_y)
-                end_time1 = time.time()  # Capture end time
-                elapsed_time1 = end_time1 - start_time1 # Calculate elapsed time
-            end_time0 = time.time()  # Capture end time
-            elapsed_time0 = end_time0 - start_time0 # Calculate elapsed time
-            if (self.log):
-                print(f"for dt: {for_elapsed}")
-                print(f"process_model dt: {process_model_elapsed_time}")
-                print(f"results dt: {elapsed_time0}")
-                print(f"run_model dt (just one box): {elapsed_time1}")
-
-        if (self.display):
-            cv2.imshow('YOLOv8 Inference', self.frame)
-            # cv2.imshow('Depth Sobel Image', depth_image)
-            cv2.waitKey(1)
-       
