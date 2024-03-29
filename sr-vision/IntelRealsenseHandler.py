@@ -78,7 +78,7 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
         except KeyboardInterrupt:
             self.stop_camera()
             
-    def get_3D_pose(self, polygons):
+    def get_3D_pose(self, depth_frame, polygon):
         """
         Calculate the centroid of the given polygon and retrieve the depth value at the centroid. 
 
@@ -92,33 +92,33 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
         int: X pixel coordinate of the centroid in the depth frame.
         int: Y pixel coordinate of the centroid in the depth frame.
         """
-        for polygon in polygons:    # Calculate the centroid
-            M = cv2.moments(np.array(polygon, dtype=np.int32))
-            if M["m00"] != 0:
-                center_x = int(M["m10"] / M["m00"])
-                center_y = int(M["m01"] / M["m00"])
-            else:
-                return None, 0, 0
+        # Calculate the centroid
+        M = cv2.moments(np.array(polygon, dtype=np.int32))
+        if M["m00"] != 0:
+            center_x = int(M["m10"] / M["m00"])
+            center_y = int(M["m01"] / M["m00"])
+        else:
+            return None, 0, 0
 
-            # Get depth value at centroid
-            if self.depth_frame:
-                depth_intrinsics = self.depth_frame.profile.as_video_stream_profile().intrinsics
-                depth_pixel = [center_x, center_y]
-                depth_in_meters = self.depth_frame.get_distance(depth_pixel[0], depth_pixel[1])
+        # Get depth value at centroid
+        if depth_frame:
+            depth_intrinsics = depth_frame.profile.as_video_stream_profile().intrinsics
+            depth_pixel = [center_x, center_y]
+            depth_in_meters = depth_frame.get_distance(depth_pixel[0], depth_pixel[1])
 
-                if depth_in_meters > 0:
-                    # Convert depth pixel to 3D point in camera coordinates
-                    depth_point = rs.rs2_deproject_pixel_to_point(depth_intrinsics, depth_pixel, depth_in_meters)
-                    x = depth_point[0]
-                    y = depth_point[1]
-                    z = depth_point[2]
-                    # flip y so up is positive
-                    # z = z - 0.0042 # slight camera offset for camera to lens protector
-                    return z, x, -y, center_x, center_y
-                else:
-                    return None, 0, 0, 0, 0
+            if depth_in_meters > 0:
+                # Convert depth pixel to 3D point in camera coordinates
+                depth_point = rs.rs2_deproject_pixel_to_point(depth_intrinsics, depth_pixel, depth_in_meters)
+                x = depth_point[0]
+                y = depth_point[1]
+                z = depth_point[2]
+                # flip y so up is positive
+                # z = z - 0.0042 # slight camera offset for camera to lens protector
+                return z, x, -y, center_x, center_y
             else:
                 return None, 0, 0, 0, 0
+        else:
+            return None, 0, 0, 0, 0
         
     '''Setters:'''
     

@@ -15,7 +15,7 @@ class FrameHandler(FrameHandlerBase):
         self.classes = ['Door Handle', 'Door Knob']
         self.center_xy = np.empty()
     
-    def get_positions(self, polygons):
+    def get_positions(self, depth_frame, polygons):
         """
         Get the positions of detected objects in a 2D matrix.
 
@@ -31,7 +31,7 @@ class FrameHandler(FrameHandlerBase):
         
         for cls, polygon in polygons:
             # Extract depth at centroid
-            depth, x, y, center_x, center_y = self.cam.get_3D_pose(polygon)
+            depth, x, y, center_x, center_y = self.cam.get_3D_pose(depth_frame, polygon)
             position = np.array([[cls, x, y, depth]])
             center = np.array([[center_x, center_y]])
             
@@ -42,7 +42,7 @@ class FrameHandler(FrameHandlerBase):
             
         return self.positions
     
-    def display_data(self, polygons, bboxes):
+    def display_data(self, frame, polygons, bboxes):
         """
         A function to display data including bounding box, segmentation polygon, and label on the frame.
 
@@ -70,15 +70,15 @@ class FrameHandler(FrameHandlerBase):
             
             # Draw bounding box 
             x1, y1, x2, y2 = bbox
-            cv2.rectangle(self.frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
             xyz_label = f"X: {center_3d[0]:.2f}, Y: {center_3d[1]:.2f}, Z: {center_3d[2]:.2f}"
             label = f"{current_class_name} {confidence:.2f} ({xyz_label})"
             
             # Draw segmentation polygon
-            cv2.polylines(self.frame, [np.array(polygon, dtype=np.int32)], isClosed=True, color=(255, 0, 255), thickness=2)
+            cv2.polylines(frame, [np.array(polygon, dtype=np.int32)], isClosed=True, color=(255, 0, 255), thickness=2)
             
             # Draw a circle at the 2D centroid
-            cv2.circle(self.frame, (center_x, center_y), 5, (0, 0, 255), -1)
+            cv2.circle(frame, (center_x, center_y), 5, (0, 0, 255), -1)
             (label_width, label_height), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
 
             # Adjust the y position of the label to sit on top or inside the bounding box
@@ -90,7 +90,9 @@ class FrameHandler(FrameHandlerBase):
                 box_y_position = y1 + label_height + baseline                      
 
             # Create a rectangle for the label background and put the text directly on the bounding box
-            cv2.rectangle(self.frame, (x1, box_y_position), (x1 + label_width, y1), (0, 255, 0), cv2.FILLED)
-            cv2.putText(self.frame, label, (x1, label_y_position), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+            cv2.rectangle(frame, (x1, box_y_position), (x1 + label_width, y1), (0, 255, 0), cv2.FILLED)
+            cv2.putText(frame, label, (x1, label_y_position), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+            
+        return frame
         
         

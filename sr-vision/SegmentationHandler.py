@@ -31,20 +31,14 @@ class SegmentationHandler(SegmentationHandlerBase):
         
         # init processing variables
         self.bboxes = None # contains (classification ID, bbox coordinates)
-        self.masks = None
+        self.polygons = None
         
     '''Getters:'''
     def get_bboxes(self):
         return self.bboxes
     
-    def get_masks(self):
-        return self.masks
-    
-    def get_positions(self):
-        return self.positions
-    
-    def get_frame(self):
-        return self.frame
+    def get_polygons(self):
+        return self.polygons
         
     '''Setters:'''
 
@@ -59,17 +53,22 @@ class SegmentationHandler(SegmentationHandlerBase):
     
     '''Processers:'''
     
-    def process_model(self):
+    def process_model(self, frame):
         # run model to get results
-        self.results = self.model(self.frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf)
+        self.results = self.model(frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf)
         # reset bboxes and masks list
         self.bboxes = None
         self.masks = None
     
-    # Main function to run the model
-    def segmentation(self):
+    def segmentation(self, frame):
+        """
+        Perform segmentation on the input frame and extract bounding boxes and segmentation masks.
+
+        :param frame: The input frame for segmentation
+        :return: A tuple containing the bounding boxes and segmentation masks
+        """
         # run inference on frame
-        self.process_model()
+        self.process_model(frame)
         
         result = None
         # extract the single inference from results
@@ -79,17 +78,21 @@ class SegmentationHandler(SegmentationHandlerBase):
                 
         if result.boxes and result.masks:
             for box, mask in zip(result.boxes, result.masks):
-                # Extract bounding box
-                bbox = box.xyxy[0].cpu().numpy().astype(int)
-                # Extract bounding box classification
-                cls = int(box.cls[0].item())
-                
-                self.bboxes.append(cls, bbox)
-                
+                if self.display:
+                    # Extract bounding box
+                    bbox = box.xyxy[0].cpu().numpy().astype(int)
+                    # Extract bounding box classification
+                    cls = int(box.cls[0].item())
+                    confidence = box.conf[0]
+                    
+                    self.bboxes.append(cls, confidence, bbox)
+                    
                 # Extract segmentation mask
                 polygon = mask.xy[0]
                 
-                self.masks.append(cls, polygon)
+                self.polygons.append(cls, polygon)
+                
+        return self.bboxes, self.polygons
                 
                 
                 

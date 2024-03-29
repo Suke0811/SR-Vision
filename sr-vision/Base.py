@@ -49,10 +49,10 @@ class FrameHandlerBase:
     def __init__(self, *args, **kwargs):
         pass
 
-    def frame_to_xyz(self, frame, depth, *args, **kwargs):
+    def get_positions(self, frame, depth, *args, **kwargs):
         raise NotImplementedError
 
-    def frame_to_distance(self, norm: int=2):
+    def get_depth(self, norm: int=2):
         raise NotImplementedError
 
 
