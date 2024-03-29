@@ -14,7 +14,6 @@ class SegmentationHandler(SegmentationHandlerBase):
         self.base_dir = Path(__file__).resolve().parent
         self.model_path = model_path
         self.model = YOLO(self.model_path)
-        self.classes = ['Door Handle', 'Door Knob']
         self.results = None
         self.max_model_size = max_model_size
         self.det_conf = det_conf
@@ -90,7 +89,7 @@ class SegmentationHandler(SegmentationHandlerBase):
                 # Extract segmentation mask
                 polygon = mask.xy[0]
                 
-                self.masks.append(polygon)
+                self.masks.append(cls, polygon)
                 
                 
                 

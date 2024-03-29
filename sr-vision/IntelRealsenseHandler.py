@@ -63,22 +63,14 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
                 color_frame = aligned_frames.get_color_frame()
 
                 if not aligned_depth_frame or not color_frame:
-                    self.depth_frame = None
-                    self.color_frame = None
                     return None, None
 
                 # Convert color image to numpy array
                 color_image = np.asanyarray(color_frame.get_data())
-                
-                # Set gotten frames to class variables for get_depth_at_centroid() function     
-                self.depth_frame = aligned_depth_frame
-                self.color_frame = color_image
 
                 return aligned_depth_frame, color_image
             else:
                 # No new frames available
-                self.depth_frame = None
-                self.color_frame = None
                 return None, None
         
         except RuntimeError:
@@ -86,7 +78,7 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
         except KeyboardInterrupt:
             self.stop_camera()
             
-    def get_depth_at_centroid_seg(self, polygons):
+    def get_3D_pose(self, polygons):
         """
         Calculate the centroid of the given polygon and retrieve the depth value at the centroid. 
 
