@@ -13,8 +13,19 @@ class FrameHandler(FrameHandlerBase):
         self.frame = frame
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.classes = ['Door Handle', 'Door Knob']
+        self.center_xy = np.empty()
     
     def get_positions(self, polygons):
+        """
+        Get the positions of detected objects in a 2D matrix.
+
+        Parameters:
+            polygons (list): A list of tuples containing the class and polygon of each detected object.
+
+        Returns:
+            numpy.ndarray: A 2D matrix containing the positions of the detected objects. Each row represents a detected object and contains the 
+            class, x-coordinate, y-coordinate, and depth of the object.
+        """
         # initialize 2D Matrix for positions of detected objects
         self.positions = np.empty((0, 4), dtype=np.float32)
         
@@ -22,10 +33,16 @@ class FrameHandler(FrameHandlerBase):
             # Extract depth at centroid
             depth, x, y, center_x, center_y = self.cam.get_3D_pose(polygon)
             position = np.array([[cls, x, y, depth]])
+            center = np.array([[center_x, center_y]])
+            
+            # Append center of detection to 2D Matrix
+            self.center_xy = np.vstack((self.center_xy, center))
             # Append position of detection to 2D Matrix
             self.positions = np.vstack((self.positions, position))
+            
+        return self.positions
     
-    def display_data(self, polygon, bbox, ID, confidence, center_x, center_y):
+    def display_data(self, polygons, bboxes):
         """
         A function to display data including bounding box, segmentation polygon, and label on the frame.
 
@@ -40,12 +57,13 @@ class FrameHandler(FrameHandlerBase):
         Returns:
         This function applies the changes to the frame and does not return anything.
         """
-        for position in self.positions:
-            # get class ID
-            ID = int(position[0])
-            
+        for position, center, polygon, box in zip(self.positions, self.center_xy, polygons, bboxes):
             # get 3D coordinates
             center_3d = position[1:4]
+            # get centroid center pixel
+            center_x, center_y = center
+            # unpack box
+            ID, confidence, bbox = box
             
             # get class name
             current_class_name = self.classes[ID]
