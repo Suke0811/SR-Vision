@@ -8,9 +8,8 @@ import numpy as np
 class FrameHandler(FrameHandlerBase):
     pass
 
-    def __init__(self, camera, frame, *args, **kwargs):
+    def __init__(self, camera, *args, **kwargs):
         self.cam = camera
-        self.frame = frame
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.classes = ['Door Handle', 'Door Knob']
         self.center_xy = np.empty()
