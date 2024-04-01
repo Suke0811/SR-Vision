@@ -30,7 +30,7 @@ class Tracker:
         """
         Updates object state by retrieving frames, performing segmentation, and displaying if set to True.
         """
-        depth_frame, color_frame = self.camera.get_frames
+        depth_frame, color_frame = self.camera.get_frames()
         bboxes, polygons = self.segmenter.segmentation(color_frame)
         self.positions = self.frame_handler.get_positions(depth_frame, polygons)
         if self.display:
