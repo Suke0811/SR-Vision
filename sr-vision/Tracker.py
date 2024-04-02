@@ -32,7 +32,7 @@ class Tracker:
         """
         depth_frame, color_frame = self.camera.get_frames()
         bboxes, polygons = self.segmenter.segmentation(color_frame)
-        self.positions = self.frame_handler.get_positions(depth_frame, polygons)
+        self.positions = self.frame_handler.get_xyz(depth_frame, polygons)
         if self.display:
             display_frame = self.frame_handler.display_data(color_frame, polygons, bboxes)
             cv2.imshow('Segmentation Inference', display_frame)

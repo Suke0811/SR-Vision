@@ -75,12 +75,14 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
         
         except RuntimeError:
             pass
-            
+
+    
     def get_3D_pose(self, depth_frame, polygon):
         """
         Calculate the centroid of the given polygon and retrieve the depth value at the centroid. 
-
+ 
         Parameters:
+        depth_frame (rs.frame): Depth frame from the Intel Realsense camera.
         polygons (list): List of points representing the polygon.
 
         Returns:
@@ -90,14 +92,25 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
         int: X pixel coordinate of the centroid in the depth frame.
         int: Y pixel coordinate of the centroid in the depth frame.
         """
+        center_x, center_y = self._get_centroid_pixel(polygon)
+        if center_x is not None and center_y is not None:
+            depth, x, y = self._get_depth_at_centroid(depth_frame, center_x, center_y)    
+            return depth, x, y, center_x, center_y
+        else:
+            return None, 0, 0, 0, 0
+        
+    def _get_centroid_pixel(self, polygon):
         # Calculate the centroid
         M = cv2.moments(np.array(polygon, dtype=np.int32))
         if M["m00"] != 0:
             center_x = int(M["m10"] / M["m00"])
             center_y = int(M["m01"] / M["m00"])
+            return center_x, center_y
         else:
-            return None, 0, 0
-
+            return None, None
+        
+    def _get_depth_at_centroid(self, depth_frame, center_x, center_y):
+        zxy_pose = None, None, None
         # Get depth value at centroid
         if depth_frame:
             depth_intrinsics = depth_frame.profile.as_video_stream_profile().intrinsics
@@ -112,11 +125,9 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
                 z = depth_point[2]
                 # flip y so up is positive
                 # z = z - 0.0042 # slight camera offset for camera to lens protector
-                return z, x, -y, center_x, center_y
-            else:
-                return None, 0, 0, 0, 0
-        else:
-            return None, 0, 0, 0, 0
+                zxy_pose = z, x, -y
+        # Return the depth, x, and y coordinates
+        return zxy_pose
         
     '''Setters:'''
     
