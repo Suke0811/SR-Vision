@@ -1,6 +1,4 @@
-from Base import FrameHandlerBase
-from Base import IntelRealsenseHandler
-from Base import SegmentationHandler
+from Base import FrameHandlerBase, IntelRealsenseHandler, SegmentationHandler
 import cv2
 import numpy as np
 
@@ -28,10 +26,10 @@ class FrameHandler(FrameHandlerBase):
         # initialize 2D Matrix for positions of detected objects
         self.positions = np.empty((0, 4), dtype=np.float32)
         
-        for cls, polygon in polygons:
+        for cls_, polygon in polygons:
             # Extract depth at centroid
             depth, x, y, center_x, center_y = self.cam.get_3D_pose(depth_frame, polygon)
-            position = np.array([[cls, x, y, depth]])
+            position = np.array([[cls_, x, y, depth]])
             center = np.array([[center_x, center_y]])
             
             # Append center of detection to 2D Matrix
@@ -54,8 +52,8 @@ class FrameHandler(FrameHandlerBase):
         for position, center, polygon, box in zip(self.positions, self.center_xy, polygons, bboxes):
             center_3d = self._get_3d_coordinates(position)
             center_x, center_y = self._get_centroid_pixel(center)
-            ID, confidence, bbox = self._unpack_box(box)
-            current_class_name = self._get_class_name(ID)
+            id_, confidence, bbox = self._unpack_box(box)
+            current_class_name = self._get_class_name(id_)
             
             self._draw_bounding_box(frame, bbox)
             label = self._create_label(current_class_name, confidence, center_3d)
@@ -69,13 +67,15 @@ class FrameHandler(FrameHandlerBase):
         return position[1:4]
 
     def _get_centroid_pixel(self, center):
-        return center
+        center_x, center_y = center
+        return center_x, center_y
 
     def _unpack_box(self, box):
-        return box
+        id_, confidence, bbox = box
+        return id_, confidence, bbox
 
-    def _get_class_name(self, ID):
-        return self.classes[ID]
+    def _get_class_name(self, id_):
+        return self.classes[id_]
 
     def _draw_bounding_box(self, frame, bbox):
         x1, y1, x2, y2 = bbox
