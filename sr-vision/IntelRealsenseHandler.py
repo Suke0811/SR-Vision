@@ -40,15 +40,15 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
     '''Getters:'''
     
     @property
-    def get_color_frame(self):
+    def color_frame(self):
         return self.color_frame
     
     @property
-    def get_depth_frame(self):
+    def depth_frame(self):
         return self.depth_frame
     
     @property
-    def get_intrinsics(self):
+    def intrinsics(self):
         return self.intrinsics
     
     def get_frames(self, wait=None):

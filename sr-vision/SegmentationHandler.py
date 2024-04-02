@@ -28,17 +28,17 @@ class SegmentationHandler(SegmentationHandlerBase):
         self._display = display
 
         # init processing variables
-        self._bboxes = None # contains (classification ID, bbox coordinates)
-        self._polygons = None
+        self.bboxes = None # contains (classification ID, bbox coordinates)
+        self.polygons = None
 
     '''Getters:'''
     @property
     def bboxes(self):
-        return self._bboxes
+        return self.bboxes
 
     @property
     def polygons(self):
-        return self._polygons
+        return self.polygons
 
     @property
     def frame(self):
@@ -71,8 +71,8 @@ class SegmentationHandler(SegmentationHandlerBase):
         self.results = self.model(frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf)
 
         # reset bboxes and polygons list
-        self._bboxes = None
-        self._polygons = None
+        self.bboxes = None
+        self.polygons = None
 
     def segmentation(self, frame):
         """
@@ -103,6 +103,6 @@ class SegmentationHandler(SegmentationHandlerBase):
 
                             # Extract confidence
                             confidence = box.conf[0]
-                            self._bboxes.append(cls_, confidence, bbox)
+                            self.bboxes.append(cls_, confidence, bbox)
 
-        return self._bboxes, self._polygons
+        return self.bboxes, self.polygons
