@@ -12,7 +12,7 @@ class FrameHandler(FrameHandlerBase):
         self.classes = ['Door Handle', 'Door Knob']
         self.center_xy = np.empty()
     
-    def get_positions(self, depth_frame, polygons, *args, **kwargs):
+    def get_xyz(self, depth_frame, polygons, *args, **kwargs):
         """
         Get the positions of detected objects in a 2D matrix.
 

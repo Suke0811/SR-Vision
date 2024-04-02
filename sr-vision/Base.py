@@ -49,7 +49,7 @@ class FrameHandlerBase:
     def __init__(self, *args, **kwargs):
         pass
 
-    def get_positions(self, frame, depth, *args, **kwargs):
+    def get_xyz(self, frame, depth, *args, **kwargs):
         raise NotImplementedError
 
     def get_depth(self, norm: int=2):
