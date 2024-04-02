@@ -39,44 +39,42 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
     
     '''Getters:'''
     
+    @property
     def get_color_frame(self):
         return self.color_frame
     
+    @property
     def get_depth_frame(self):
         return self.depth_frame
     
+    @property
     def get_intrinsics(self):
         return self.intrinsics
     
-    def get_frames(self):
+    def get_frames(self, wait=None):
+        # Use provided wait value or fall back to class default
+        if wait is None:
+            wait = self.wait
         try:
-            # Attempt to retrieve the next set of frames
-            if self.wait:
-                frames = self.pipeline.wait_for_frames()
-            else:
-                frames = self.pipeline.poll_for_frames()
-                
-            # Check if frames are available
-            if frames:
-                aligned_frames = self.align.process(frames)
-                aligned_depth_frame = aligned_frames.get_depth_frame()
-                color_frame = aligned_frames.get_color_frame()
-
-                if not aligned_depth_frame or not color_frame:
-                    return None, None
-
+            # Retrieve next set of frames
+            frames = self.pipeline.wait_for_frames() if wait else self.pipeline.poll_for_frames()
+            
+            # Align and retrieve depth and color frames
+            aligned_frames = self.align.process(frames)
+            aligned_depth_frame = aligned_frames.get_depth_frame()
+            color_frame = aligned_frames.get_color_frame()
+            
+            # Check if all frames are available
+            if aligned_depth_frame and color_frame:
                 # Convert color image to numpy array
                 color_image = np.asanyarray(color_frame.get_data())
-
+                
                 return aligned_depth_frame, color_image
             else:
-                # No new frames available
                 return None, None
         
         except RuntimeError:
             pass
-        except KeyboardInterrupt:
-            self.stop_camera()
             
     def get_3D_pose(self, depth_frame, polygon):
         """

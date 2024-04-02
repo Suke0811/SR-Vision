@@ -66,7 +66,7 @@ class SegmentationHandler(SegmentationHandlerBase):
         self._display = value
 
     '''Processors:'''
-    def process_model(self, frame):
+    def _process_model(self, frame):
         # run model to get results
         self.results = self.model(frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf)
 
@@ -81,7 +81,7 @@ class SegmentationHandler(SegmentationHandlerBase):
         :return: A tuple containing the bounding boxes and segmentation masks
         """
         # run inference on frame
-        self.process_model(frame)
+        self._process_model(frame)
         result = None
 
         # extract the single inference from results
