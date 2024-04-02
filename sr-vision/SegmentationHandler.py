@@ -90,17 +90,19 @@ class SegmentationHandler(SegmentationHandlerBase):
                 result = inference
                 if result.boxes and result.masks:
                     for box, mask in zip(result.boxes, result.masks):
+                        # Extract bounding box classification
+                        cls_ = int(box.cls[0].item())
+                        # Extract segmentation mask
+                        polygon = mask.xy[0]
+                        self._polygons.append(cls_, polygon)
+
+                        # bboxes not needed if not displaying
                         if self._display:
                             # Extract bounding box
                             bbox = box.xyxy[0].cpu().numpy().astype(int)
 
-                            # Extract bounding box classification
-                            cls = int(box.cls[0].item())
+                            # Extract confidence
                             confidence = box.conf[0]
-                            self._bboxes.append(cls, confidence, bbox)
-
-                        # Extract segmentation mask
-                        polygon = mask.xy[0]
-                        self._polygons.append(cls, polygon)
+                            self._bboxes.append(cls_, confidence, bbox)
 
         return self._bboxes, self._polygons
