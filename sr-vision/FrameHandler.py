@@ -13,6 +13,12 @@ class FrameHandler(FrameHandlerBase):
         self.center_xy = np.empty()
     
     def get_xyz(self, depth_frame, polygons, *args, **kwargs):
+        return self._get_positions(depth_frame, polygons)
+    
+    def get_depth(self, norm: int=2):
+        pass
+    
+    def _get_positions(self, depth_frame, polygons, *args, **kwargs):
         """
         Get the positions of detected objects in a 2D matrix.
 

@@ -49,7 +49,8 @@ class FrameHandlerBase:
     def __init__(self, *args, **kwargs):
         pass
 
-    def get_xyz(self, frame, depth, *args, **kwargs):
+    # polygons is the array of points for the segmentation mask
+    def get_xyz(self, depth_frame, polygons, *args, **kwargs):
         raise NotImplementedError
 
     def get_depth(self, norm: int=2):
