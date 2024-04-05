@@ -6,8 +6,6 @@ import cv2
 
 class Tracker:
     def __init__(self, model_path, log=False, display=True):
-        """
-        """
         self.segmenter = SegmentationHandler(model_path, log, display)
         self.camera = IntelRealsenseHandler()
         self.frame_handler = FrameHandler(self.camera)
@@ -25,6 +23,12 @@ class Tracker:
     
     def stop (self):
         self.run = False
+
+    def _dispaly_frame(self, display, color_frame, polygons, bboxes):
+        if display:
+            display_frame = self.frame_handler.display_data(color_frame, polygons, bboxes)
+            cv2.imshow('Segmentation Inference', display_frame)
+            cv2.waitKey(1)
     
     def update(self):
         """
@@ -33,8 +37,5 @@ class Tracker:
         depth_frame, color_frame = self.camera.get_frames()
         bboxes, polygons = self.segmenter.segmentation(color_frame)
         self.positions = self.frame_handler.get_xyz(depth_frame, polygons)
-        if self.display:
-            display_frame = self.frame_handler.display_data(color_frame, polygons, bboxes)
-            cv2.imshow('Segmentation Inference', display_frame)
-            cv2.waitKey(1)
+        self._dispaly_frame(self.display, color_frame, polygons, bboxes)
             

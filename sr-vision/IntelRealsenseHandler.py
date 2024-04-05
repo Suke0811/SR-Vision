@@ -9,22 +9,15 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
     pass
 
     def __init__(self, timeout=DEFAULT_TIMEOUT):
+        super().__init__(timeout) # init params in base class
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
         self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-        self.wait = True # use poll for frames or wait for frames
         
         # Align the two cameras since there is physical offset
         self.align_to = rs.stream.color
         self.align = rs.align(self.align_to)
-        
-        # Variable to hold camera intrinsics
-        self.intrinsics = None
-        
-        # np arrays for both depth and color images
-        self.depth_frame = None
-        self.color_frame = None
         
     def start_camera(self):
         # Start the pipeline
