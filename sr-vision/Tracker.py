@@ -13,7 +13,15 @@ class Tracker:
         self.display = display
         self.log = log
         self.run = True
+    
+    def __del__(self):
+        self.stop()
+        self.camera.stop_camera()
+        cv2.destroyAllWindows()
 
+    def uninit(self):
+        self.__del__()
+        
     def run(self):
         while self.run:
             try:
