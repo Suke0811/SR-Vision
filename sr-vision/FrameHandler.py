@@ -1,16 +1,34 @@
 from Base import FrameHandlerBase, IntelRealsenseHandler, SegmentationHandler
+from Tracker_detection import Tracker_detection
+from Tracker_segmentation import Tracker_segmentation
 import cv2
 import numpy as np
 
 
 class FrameHandler(FrameHandlerBase):
-    pass
-
-    def __init__(self, camera, *args, **kwargs):
+    def __init__(self, camera, tracker_type='detection', *args, **kwargs):
         self.cam = camera
         self.positions = np.empty((0, 4), dtype=np.float32)
-        self.classes = ['Door Handle', 'Door Knob']
-        self.center_xy = np.empty()
+        self.tracker = None
+        self.tracker_type = tracker_type
+        self.center_xy = np.empty((0, 2), dtype=np.float32)  # Corrected initialization
+
+        if tracker_type == 'detection':
+            self.tracker = Tracker_detection()
+        elif tracker_type == 'segmentation':
+            self.tracker = Tracker_segmentation()
+        else:
+            raise ValueError("Invalid tracker type specified.")
+    
+    @property
+    def classes(self):
+        # Assuming both Tracker_detection and Tracker_segmentation have a 'classes' attribute
+        return self.tracker.classes if self.tracker else None
+
+    @classes.setter
+    def classes(self, classes):
+        if self.tracker:
+            self.tracker.classes = classes
     
     def get_xyz(self, depth_frame, polygons, *args, **kwargs):
         return self._get_positions(depth_frame, polygons)
@@ -45,7 +63,9 @@ class FrameHandler(FrameHandlerBase):
             
         return self.positions
     
-    def display_data(self, frame, polygons, bboxes):
+    '''DISPLAY FUNCTIONS'''
+
+    def display_data(self, frame, bboxes, polygons=None):
         """
         A function to display data including bounding box, segmentation polygon, and label on the frame.
         Parameters:
@@ -55,15 +75,16 @@ class FrameHandler(FrameHandlerBase):
         Returns:
         - The frame with the applied changes
         """
-        for position, center, polygon, box in zip(self.positions, self.center_xy, polygons, bboxes):
+        for position, center, box, polygon in zip(self.positions, self.center_xy, bboxes, polygons):
             center_3d = self._get_3d_coordinates(position)
             center_x, center_y = self._get_centroid_pixel(center)
             id_, confidence, bbox = self._unpack_box(box)
             current_class_name = self._get_class_name(id_)
-            
             self._draw_bounding_box(frame, bbox)
             label = self._create_label(current_class_name, confidence, center_3d)
-            self._draw_segmentation_polygon(frame, polygon)
+            # check if drawing for segmentation or detection
+            if polygon is not None:
+                self._draw_segmentation_polygon(frame, polygon)
             self._draw_centroid(frame, center_x, center_y)
             self._draw_label(frame, bbox, label)
         
@@ -81,7 +102,11 @@ class FrameHandler(FrameHandlerBase):
         return id_, confidence, bbox
 
     def _get_class_name(self, id_):
-        return self.classes[id_]
+        try:
+            return self._classes[id_]
+        except IndexError:
+            return "???"
+
 
     def _draw_bounding_box(self, frame, bbox):
         x1, y1, x2, y2 = bbox
