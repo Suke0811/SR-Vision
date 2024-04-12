@@ -1,12 +1,12 @@
 from Tracker_detection import Tracker
-import pathlib as Path
+from pathlib import Path
 
-def main(self):
-    base_path = Path(__file__).parent
-    model_path = str(base_path / "weights" / "yolov8m.pt")
+def main():
+    base_path = Path(__file__).resolve().parent
+    model_path = base_path / "weights" / "yolov8m.pt"
     tracker = Tracker(model_path)
 
-    tracker.run()
+    tracker.run_model()
 
     tracker.uninit()
 

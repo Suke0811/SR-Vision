@@ -1,4 +1,4 @@
-from .Base import DEFAULT_TIMEOUT
+from Base import DEFAULT_TIMEOUT
 from Base import IntelRealsenseHandlerBase
 import pyrealsense2 as rs
 import numpy as np
@@ -6,8 +6,6 @@ import cv2
 
 
 class IntelRealsenseHandler(IntelRealsenseHandlerBase):
-    pass
-
     def __init__(self, timeout=DEFAULT_TIMEOUT):
         super().__init__(timeout) # init params in base class
         self.pipeline = rs.pipeline()
@@ -23,7 +21,7 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
         # Start the pipeline
         self.profile = self.pipeline.start(self.config)
         # Get the camera intrinsics from the color stream
-        self.intrinsics = self.profile.get_stream(rs.stream.color).as_video_stream_profile().get_intrinsics()
+        self._intrinsics = self.profile.get_stream(rs.stream.color).as_video_stream_profile().get_intrinsics()
 
     
     def stop_camera(self):
@@ -38,11 +36,24 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
     
     @property
     def depth_frame(self):
-        return self.depth_frame
+        return self._depth_frame
     
     @property
     def intrinsics(self):
-        return self.intrinsics
+        return self._intrinsics
+    
+    '''Setters:'''
+    @color_frame.setter
+    def color_frame(self, value):
+        self._color_frame = value
+    
+    @depth_frame.setter
+    def depth_frame(self, value):
+        self._depth_frame = value
+
+    @intrinsics.setter
+    def intrinsics(self, value):
+        self._intrinsics = value
     
     def get_frames(self, wait=None):
         # Use provided wait value or fall back to class default
@@ -122,5 +133,5 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
         # Return the depth, x, and y coordinates
         return zxy_pose
         
-    '''Setters:'''
+    
     

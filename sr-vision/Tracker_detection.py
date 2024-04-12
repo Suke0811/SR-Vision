@@ -1,17 +1,18 @@
-from Base import FrameHandler
-from Base import IntelRealsenseHandler
+from FrameHandler import FrameHandler
+from IntelRealsenseHandler import IntelRealsenseHandler
 from DetectionHandler import DetectionHander
-from numpy import np
+import numpy as np
 import cv2
 
 class Tracker:
     def __init__(self, model_path, log=False, display=True):
         self.detector = DetectionHander(model_path, log, display)
         self.camera = IntelRealsenseHandler()
-        self.frame_handler = FrameHandler(self.camera, 'detection')
+        # this is used inside frame handler
+        self._classes = []
+        self.frame_handler = FrameHandler(self.camera, self)
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.display = display
-        self._classes = []
         self.log = log
         self.run = True
     
@@ -23,7 +24,9 @@ class Tracker:
     def uninit(self):
         self.__del__()
         
-    def run(self):
+    def run_model(self):
+        print("HIT START CAMERA")
+        self.camera.start_camera()
         while self.run:
             try:
                 self.update()

@@ -4,13 +4,13 @@ DEFAULT_TIMEOUT = 100
 class IntelRealsenseHandlerBase:
     def __init__(self, timeout=DEFAULT_TIMEOUT, *args, **kwargs):
          # Variable to hold camera intrinsics
-        self.intrinsics = None
-        self.wait = True # use poll for frames or wait for frames
+        self._intrinsics = None
+        self._wait = True # use poll for frames or wait for frames
         self.timeout = DEFAULT_TIMEOUT
         
         # np arrays for both depth and color images
-        self.depth_frame = None
-        self.color_frame = None
+        self._depth_frame = None
+        self._color_frame = None
         pass
 
     def init(self):

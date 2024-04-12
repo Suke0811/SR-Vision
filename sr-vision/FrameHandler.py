@@ -1,34 +1,18 @@
-from Base import FrameHandlerBase, IntelRealsenseHandler, SegmentationHandler
-from Tracker_detection import Tracker_detection
-from Tracker_segmentation import Tracker_segmentation
+from Base import FrameHandlerBase, IntelRealsenseHandlerBase, SegmentationHandlerBase
+from IntelRealsenseHandler import IntelRealsenseHandler
+from DetectionHandler import DetectionHander
 import cv2
 import numpy as np
 
 
 class FrameHandler(FrameHandlerBase):
-    def __init__(self, camera, tracker_type='detection', *args, **kwargs):
+    def __init__(self, camera, tracker, *args, **kwargs):
         self.cam = camera
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.tracker = None
-        self.tracker_type = tracker_type
+        self.tracker = tracker
         self.center_xy = np.empty((0, 2), dtype=np.float32)  # Corrected initialization
-
-        if tracker_type == 'detection':
-            self.tracker = Tracker_detection()
-        elif tracker_type == 'segmentation':
-            self.tracker = Tracker_segmentation()
-        else:
-            raise ValueError("Invalid tracker type specified.")
-    
-    @property
-    def classes(self):
-        # Assuming both Tracker_detection and Tracker_segmentation have a 'classes' attribute
-        return self.tracker.classes if self.tracker else None
-
-    @classes.setter
-    def classes(self, classes):
-        if self.tracker:
-            self.tracker.classes = classes
+        self._classes = self.tracker.classes
     
     def get_xyz(self, depth_frame, polygons, *args, **kwargs):
         return self._get_positions(depth_frame, polygons)

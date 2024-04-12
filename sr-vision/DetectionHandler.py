@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-import pathlib as Path
+from pathlib import Path
 import torch
 import time
 from ultralytics import YOLO
@@ -31,8 +31,8 @@ class DetectionHander():
 
     '''Getters:'''
     @property
-    def bboxes(self):
-        return self.bboxes
+    # def bboxes(self):
+    #     return self.bboxes
 
     @property
     def frame(self):
