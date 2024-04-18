@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 
 class Tracker:
+    
     def __init__(self, model_path, log=False, display=True):
         self.detector = DetectionHander(model_path, log, display)
         self.camera = IntelRealsenseHandler()
@@ -27,10 +28,13 @@ class Tracker:
     def run_model(self):
         print("HIT START CAMERA")
         self.camera.start_camera()
+        print("CAMERA START NO PROBLEM")
         while self.run:
             try:
                 self.update()
-            except:
+            except Exception as e:
+                print('HITTING EXCEPTION')
+                print(f"Failed to retrieve frames: {e}")
                 self.run = False
     
     def stop (self):
@@ -39,14 +43,16 @@ class Tracker:
     def _dispaly_frame(self, display, color_frame, polygons, bboxes):
         if display:
             display_frame = self.frame_handler.display_data(color_frame, polygons, bboxes)
-            cv2.imshow('Segmentation Inference', display_frame)
+            cv2.imshow('Detection Inference', display_frame)
             cv2.waitKey(1)
     
     def update(self):
         """
         Updates object state by retrieving frames, performing segmentation, and displaying if set to True.
         """
+        print ("UPDATING")
         depth_frame, color_frame = self.camera.get_frames()
+        print("FRAME RECIEVED")
         bboxes = self.detector.detection(color_frame)
         self.positions = self.frame_handler.get_xyz(depth_frame, bboxes)
         self._dispaly_frame(self.display, color_frame, bboxes)

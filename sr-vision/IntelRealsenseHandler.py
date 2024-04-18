@@ -7,26 +7,31 @@ import cv2
 
 class IntelRealsenseHandler(IntelRealsenseHandlerBase):
     def __init__(self, timeout=DEFAULT_TIMEOUT):
-        super().__init__(timeout) # init params in base class
+        super().__init__(timeout)
         self.pipeline = rs.pipeline()
         self.config = rs.config()
-        self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-        self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-        
-        # Align the two cameras since there is physical offset
+        self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 60)
+        self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 60)
         self.align_to = rs.stream.color
         self.align = rs.align(self.align_to)
-        
-    def start_camera(self):
-        # Start the pipeline
-        self.profile = self.pipeline.start(self.config)
-        # Get the camera intrinsics from the color stream
-        self._intrinsics = self.profile.get_stream(rs.stream.color).as_video_stream_profile().get_intrinsics()
+        self.is_running = False
+        self.wait = True
 
-    
+    def start_camera(self):
+        try:
+            self.profile = self.pipeline.start(self.config)
+            self.is_running = True
+        except Exception as e:
+            print(f"Failed to start camera: {e}")
+
     def stop_camera(self):
-        # Stop the pipeline
-        self.pipeline.stop()
+        if self.is_running:
+            self.pipeline.stop()
+            self.is_running = False
+
+    def __del__(self):
+        if self.is_running:
+            self.stop_camera()
     
     '''Getters:'''
     
@@ -77,8 +82,9 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
             else:
                 return None, None
         
-        except RuntimeError:
-            pass
+        except RuntimeError as e:
+            print(f"RuntimeError occurred: {e}")
+            return None, None
 
     
     def get_3D_pose(self, depth_frame, polygon):

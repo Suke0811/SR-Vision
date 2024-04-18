@@ -6,7 +6,7 @@ import time
 from ultralytics import YOLO
 
 class DetectionHander():
-    def __init__(self, model_path, log=False, display=False, max_model_size=640, det_conf=0.1, *args, **kwargs):
+    def __init__(self, model_path, log=False, display=False, max_model_size=640, det_conf=0.2, *args, **kwargs):
         # init model variables
         self.base_dir = Path(__file__).resolve().parent
         self.model_path = model_path
