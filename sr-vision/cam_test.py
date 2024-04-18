@@ -9,10 +9,11 @@ def main():
     camera.start_camera()
     model = YOLO('/home/romela/Alvin-files/SR-Vision/sr-vision/weights/yolov8m.pt')
     while True:
-        depth_frame, color_frame  = camera.get_frames(True)
+        depth_frame, color_frame = camera.get_frames(True)
         results = model(color_frame)
+        annotated_frame = results[0].plot()
         # print('showing frames')
-        cv2.imshow('camera test', color_frame)
+        cv2.imshow('camera test', annotated_frame)
         cv2.waitKey(1)
 
 

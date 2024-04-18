@@ -6,13 +6,11 @@ import numpy as np
 
 
 class FrameHandler(FrameHandlerBase):
-    def __init__(self, camera, tracker, *args, **kwargs):
+    def __init__(self, camera, classes, *args, **kwargs):
         self.cam = camera
         self.positions = np.empty((0, 4), dtype=np.float32)
-        self.tracker = None
-        self.tracker = tracker
         self.center_xy = np.empty((0, 2), dtype=np.float32)  # Corrected initialization
-        self._classes = self.tracker.classes
+        self._classes = classes
     
     def get_xyz(self, depth_frame, polygons, *args, **kwargs):
         return self._get_positions(depth_frame, polygons)

@@ -66,7 +66,12 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
             wait = self.wait
         try:
             # Retrieve next set of frames
-            frames = self.pipeline.wait_for_frames() if wait else self.pipeline.poll_for_frames()
+            if wait:
+                # Wait for frames
+                frames = self.pipeline.wait_for_frames()
+            else:  
+                # Poll for frames
+                frames = self.pipeline.poll_for_frames()
             
             # Align and retrieve depth and color frames
             aligned_frames = self.align.process(frames)

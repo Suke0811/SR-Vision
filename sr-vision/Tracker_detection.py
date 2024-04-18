@@ -11,19 +11,19 @@ class Tracker:
         self.camera = IntelRealsenseHandler()
         # this is used inside frame handler
         self._classes = []
-        self.frame_handler = FrameHandler(self.camera, self)
+        self.frame_handler = FrameHandler(self.camera, self._classes)
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.display = display
         self.log = log
         self.run = True
     
     def __del__(self):
+        self.uninit()
+
+    def uninit(self):
         self.stop()
         self.camera.stop_camera()
         cv2.destroyAllWindows()
-
-    def uninit(self):
-        self.__del__()
         
     def run_model(self):
         print("HIT START CAMERA")
@@ -35,7 +35,7 @@ class Tracker:
             except Exception as e:
                 print('HITTING EXCEPTION')
                 print(f"Failed to retrieve frames: {e}")
-                self.run = False
+                # self.run = False
     
     def stop (self):
         self.run = False
@@ -56,6 +56,7 @@ class Tracker:
         bboxes = self.detector.detection(color_frame)
         self.positions = self.frame_handler.get_xyz(depth_frame, bboxes)
         self._dispaly_frame(self.display, color_frame, bboxes)
+
             
     @property
     def classes(self):
