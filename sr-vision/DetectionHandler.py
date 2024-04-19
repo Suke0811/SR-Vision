@@ -27,7 +27,7 @@ class DetectionHander():
         self._display = display
 
         # init processing variables
-        self.bboxes = None # contains (classification ID, bbox coordinates)
+        self.bboxes = [] # contains (classification ID, bbox coordinates)
 
     '''Getters:'''
     @property
@@ -65,7 +65,7 @@ class DetectionHander():
         self.results = self.model(frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf)
 
         # reset bboxes 
-        self.bboxes = None
+        self.bboxes = []
 
     def detection(self, frame):
         """
@@ -86,7 +86,7 @@ class DetectionHander():
             for inference in self.results:
                 result = inference
                 if result.boxes:
-                    for box in zip(result.boxes, result.masks):
+                    for box in result.boxes:
                         # Extract bounding box classification
                         cls_ = int(box.cls[0].item())
 
@@ -95,6 +95,7 @@ class DetectionHander():
 
                         # Extract confidence
                         confidence = box.conf[0]
-                        self.bboxes.append(cls_, confidence, bbox)
+                        bbox = (cls_, confidence, bbox)
+                        self.bboxes.append(bbox)
 
         return self.bboxes

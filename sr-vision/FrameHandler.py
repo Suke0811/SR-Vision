@@ -6,7 +6,7 @@ import numpy as np
 
 
 class FrameHandler(FrameHandlerBase):
-    def __init__(self, camera, classes, *args, **kwargs):
+    def __init__(self, camera, classes=[], *args, **kwargs):
         self.cam = camera
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.center_xy = np.empty((0, 2), dtype=np.float32)  # Corrected initialization
@@ -24,6 +24,7 @@ class FrameHandler(FrameHandlerBase):
 
         Parameters:
             polygons (list): A list of tuples containing the class and polygon of each detected object.
+            - polygons can also be a bbox
 
         Returns:
             numpy.ndarray: A 2D matrix containing the positions of the detected objects. Each row represents a detected object and contains the 
@@ -32,7 +33,7 @@ class FrameHandler(FrameHandlerBase):
         # initialize 2D Matrix for positions of detected objects
         self.positions = np.empty((0, 4), dtype=np.float32)
         
-        for cls_, polygon in polygons:
+        for cls_, confidence, polygon in polygons:
             # Extract depth at centroid
             depth, x, y, center_x, center_y = self.cam.get_3D_pose(depth_frame, polygon)
             position = np.array([[cls_, x, y, depth]])
@@ -57,19 +58,24 @@ class FrameHandler(FrameHandlerBase):
         Returns:
         - The frame with the applied changes
         """
-        for position, center, box, polygon in zip(self.positions, self.center_xy, bboxes, polygons):
-            center_3d = self._get_3d_coordinates(position)
-            center_x, center_y = self._get_centroid_pixel(center)
-            id_, confidence, bbox = self._unpack_box(box)
-            current_class_name = self._get_class_name(id_)
-            self._draw_bounding_box(frame, bbox)
-            label = self._create_label(current_class_name, confidence, center_3d)
-            # check if drawing for segmentation or detection
-            if polygon is not None:
-                self._draw_segmentation_polygon(frame, polygon)
-            self._draw_centroid(frame, center_x, center_y)
-            self._draw_label(frame, bbox, label)
-        
+        if bboxes is not None:
+            try: 
+                for position, center, box, polygon in zip(self.positions, self.center_xy, bboxes, polygons):
+                    # print (f'Position: {position}, Center: {center}, Box: {box}, Polygon: {polygon}')
+                    center_3d = self._get_3d_coordinates(position)
+                    center_x, center_y = self._get_centroid_pixel(center)
+                    id_, confidence, bbox = self._unpack_box(box)
+                    current_class_name = self._get_class_name(id_)
+                    self._draw_bounding_box(frame, bbox)
+                    label = self._create_label(current_class_name, confidence, center_3d)
+                    # check if drawing for segmentation or detection
+                    if polygon is not None:
+                        self._draw_segmentation_polygon(frame, polygon)
+                    self._draw_centroid(frame, center_x, center_y)
+                    self._draw_label(frame, bbox, label)
+            except Exception as e:
+                print (e)
+                print(f'Position: {self.positions}, Center: {self.center_xy}, Box: {bboxes}')
         return frame
 
     def _get_3d_coordinates(self, position):
