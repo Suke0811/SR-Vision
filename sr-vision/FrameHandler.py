@@ -6,11 +6,12 @@ import numpy as np
 
 
 class FrameHandler(FrameHandlerBase):
-    def __init__(self, camera, classes=[], *args, **kwargs):
+    def __init__(self, camera, classes=[], colors={},*args, **kwargs):
         self.cam = camera
         self.positions = np.empty((0, 4), dtype=np.float32)
-        self.center_xy = np.empty((0, 2), dtype=np.float32)  # Corrected initialization
+        self.center_xy = np.empty((0, 2), dtype=np.float32)  
         self._classes = classes
+        self._colors = colors
     
     def get_xyz(self, depth_frame, polygons, *args, **kwargs):
         return self._get_positions(depth_frame, polygons)
@@ -30,7 +31,7 @@ class FrameHandler(FrameHandlerBase):
             numpy.ndarray: A 2D matrix containing the positions of the detected objects. Each row represents a detected object and contains the 
             class, x-coordinate, y-coordinate, and depth of the object.
         """
-        # initialize 2D Matrix for positions of detected objects
+        # initialize 2D Matrix for positions of detected objects / refresh for each cycle
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.center_xy = np.empty((0, 2), dtype=np.float32)
         

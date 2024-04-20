@@ -10,7 +10,8 @@ class Tracker:
         self.segmenter = SegmentationHandler(model_path, log, display)
         self.camera = IntelRealsenseHandler()
         # this is used inside frame handler
-        self._classes = []
+        self.classes_ = []
+        self.colors_ = {}
         self.frame_handler = FrameHandler(self.camera, self._classes)
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.display = display
@@ -31,7 +32,7 @@ class Tracker:
         while self.run:
             try:
                 self.update()
-                
+
             except Exception as e:
                 print('HITTING EXCEPTION')
                 print(f"Error: {e}")
@@ -51,16 +52,23 @@ class Tracker:
         """
         Updates object state by retrieving frames, performing segmentation, and displaying if set to True.
         """
-        depth_frame, color_frame = self.camera.get_frames()
+        depth_frame, color_frame = self.camera.get_frames(wait=False)
         bboxes, polygons = self.segmenter.segmentation(color_frame)
         self.positions = self.frame_handler.get_xyz(depth_frame, polygons)
         self._dispaly_frame(self.display, color_frame, bboxes, polygons)
 
     @property
     def classes(self):
-        return self._classes
+        return self.classes_
     
     @classes.setter
     def classes(self, classes):
-        self._classes = classes
-            
+        self.classes_ = classes
+    
+    @property
+    def colors(self):
+        return self.colors_
+    
+    @colors.setter
+    def colors(self, colors):
+        self.colors_ = colors

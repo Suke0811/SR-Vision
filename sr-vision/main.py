@@ -1,10 +1,10 @@
-from Tracker_detection import Tracker
+from Tracker_segmentation import Tracker
 from pathlib import Path
 import traceback
 
 def main():
     base_path = Path(__file__).resolve().parent
-    model_path = str(base_path / "weights" / "yolov8m.pt")
+    model_path = str(base_path / "weights" / "yolov8m-seg.pt")
     # print(f"Model path: {model_path}")
     tracker = Tracker(model_path, log=False, display=True)
 

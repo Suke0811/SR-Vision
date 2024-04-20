@@ -50,7 +50,7 @@ class Tracker:
     
     def update(self):
         """
-        Updates object state by retrieving frames, performing segmentation, and displaying if set to True.
+        Updates object state by retrieving frames, performing detection, and displaying if set to True.
         """
         depth_frame, color_frame = self.camera.get_frames()
         bboxes = self.detector.detection(color_frame)
