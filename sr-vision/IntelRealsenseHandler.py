@@ -125,7 +125,7 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
 
             # Calculate the moments
             M = cv2.moments(points)
-            print(f"Moment calculation: {M}")
+            # print(f"Moment calculation: {M}")
             if M["m00"] > 0:
                 center_x = int(M["m10"] / M["m00"])
                 center_y = int(M["m01"] / M["m00"])

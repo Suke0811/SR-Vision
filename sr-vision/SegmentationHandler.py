@@ -1,13 +1,13 @@
 from Base import SegmentationHandlerBase
 import cv2
 import numpy as np
-import pathlib as Path
+from pathlib import Path
 import torch
 import time
 from ultralytics import YOLO
 
 class SegmentationHandler(SegmentationHandlerBase):
-    def __init__(self, model_path, log=False, display=False, max_model_size=640, det_conf=0.1, *args, **kwargs):
+    def __init__(self, model_path, log=False, display=False, max_model_size=640, det_conf=0.2, *args, **kwargs):
         # init model variables
         self.base_dir = Path(__file__).resolve().parent
         self.model_path = model_path
@@ -28,17 +28,17 @@ class SegmentationHandler(SegmentationHandlerBase):
         self._display = display
 
         # init processing variables
-        self.bboxes = None # contains (classification ID, bbox coordinates)
-        self.polygons = None
+        self.bboxes = [] # contains (classification ID, bbox coordinates)
+        self.polygons = []
 
     '''Getters:'''
-    @property
-    def bboxes(self):
-        return self.bboxes
+    # @property
+    # def bboxes(self):
+    #     return self.bboxes
 
-    @property
-    def polygons(self):
-        return self.polygons
+    # @property
+    # def polygons(self):
+    #     return self.polygons
 
     @property
     def frame(self):
@@ -68,11 +68,11 @@ class SegmentationHandler(SegmentationHandlerBase):
     '''Processors:'''
     def _process_model(self, frame):
         # run model to get results
-        self.results = self.model(frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf)
+        self.results = self.model(frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf, verbose=self._log)
 
         # reset bboxes and polygons list
-        self.bboxes = None
-        self.polygons = None
+        self.bboxes = []
+        self.polygons = []
 
     def segmentation(self, frame):
         """
@@ -94,15 +94,18 @@ class SegmentationHandler(SegmentationHandlerBase):
                         cls_ = int(box.cls[0].item())
                         # Extract segmentation mask
                         polygon = mask.xy[0]
-                        self._polygons.append(cls_, polygon)
 
-                        # bboxes not needed if not displaying
-                        if self._display:
-                            # Extract bounding box
-                            bbox = box.xyxy[0].cpu().numpy().astype(int)
+                        # Extract bounding box
+                        bbox = box.xyxy[0].cpu().numpy().astype(int)
 
-                            # Extract confidence
-                            confidence = box.conf[0]
-                            self.bboxes.append(cls_, confidence, bbox)
+                        # Extract confidence
+                        confidence = box.conf[0]
+
+                        # make bbox and polgyon tuple
+                        bbox = (cls_, confidence, bbox)
+                        polgyon = (cls_, confidence, polygon)
+
+                        self.polygons.append(polygon)
+                        self.bboxes.append(bbox)
 
         return self.bboxes, self.polygons

@@ -32,6 +32,7 @@ class FrameHandler(FrameHandlerBase):
         """
         # initialize 2D Matrix for positions of detected objects
         self.positions = np.empty((0, 4), dtype=np.float32)
+        self.center_xy = np.empty((0, 2), dtype=np.float32)
         
         for cls_, confidence, polygon in polygons:
             # Extract depth at centroid
@@ -53,41 +54,50 @@ class FrameHandler(FrameHandlerBase):
         A function to display data including bounding box, segmentation polygon, and label on the frame.
         Parameters:
         - frame: The input frame
-        - polygons: The segmentation polygon points
+        - polygons: The segmentation polygon points or None
         - bboxes: The bounding box objects containing class ID, confidence, and coordinates
         Returns:
         - The frame with the applied changes
         """
+        # Ensure polygons is iterable and of the same length as bboxes
+        if polygons is None:
+            polygons = [None] * len(bboxes)
+
         if bboxes is not None:
-            try: 
+            try:
                 for position, center, box, polygon in zip(self.positions, self.center_xy, bboxes, polygons):
-                    # print (f'Position: {position}, Center: {center}, Box: {box}, Polygon: {polygon}')
                     center_3d = self._get_3d_coordinates(position)
                     center_x, center_y = self._get_centroid_pixel(center)
                     id_, confidence, bbox = self._unpack_box(box)
                     current_class_name = self._get_class_name(id_)
                     self._draw_bounding_box(frame, bbox)
                     label = self._create_label(current_class_name, confidence, center_3d)
-                    # check if drawing for segmentation or detection
+
+                    # Only draw the polygon if it is not None
                     if polygon is not None:
+                        self._unpack_shape(polygon)
                         self._draw_segmentation_polygon(frame, polygon)
+
                     self._draw_centroid(frame, center_x, center_y)
                     self._draw_label(frame, bbox, label)
+
             except Exception as e:
-                print (e)
-                print(f'Position: {self.positions}, Center: {self.center_xy}, Box: {bboxes}')
+                # print(e)
+                # print(f'Position: {self.positions}, Center: {self.center_xy}, Box: {bboxes}, Polygons: {polygons}')
+                pass
         return frame
+
 
     def _get_3d_coordinates(self, position):
         return position[1:4]
 
     def _get_centroid_pixel(self, center):
-        center_x, center_y = center
+        center_x, center_y = int(center[0]), int(center[1])
         return center_x, center_y
 
-    def _unpack_box(self, box):
-        id_, confidence, bbox = box
-        return id_, confidence, bbox
+    def _unpack_shape(self, shape):
+        id_, confidence, _shape = shape
+        return id_, confidence, _shape
 
     def _get_class_name(self, id_):
         try:
