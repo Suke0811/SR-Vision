@@ -3,10 +3,11 @@ from IntelRealsenseHandler import IntelRealsenseHandler
 from DetectionHandler import DetectionHander
 import numpy as np
 import cv2
+import traceback
 
 class Tracker:
     
-    def __init__(self, model_path, log=False, display=True):
+    def __init__(self, model_path, log=False, display=False):
         self.detector = DetectionHander(model_path, log, display)
         self.camera = IntelRealsenseHandler()
         # this is used inside frame handler
@@ -32,8 +33,10 @@ class Tracker:
             try:
                 self.update()
             except Exception as e:
-                print('HITTING EXCEPTION')
+                print('HITTING EXCEPTION IN TRACKER')
                 print(f"Error: {e}")
+                print(traceback.format_exc())
+                
                 # self.run = False
     
     def stop (self):

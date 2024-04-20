@@ -102,10 +102,10 @@ class SegmentationHandler(SegmentationHandlerBase):
                         confidence = box.conf[0]
 
                         # make bbox and polgyon tuple
-                        bbox = (cls_, confidence, bbox)
-                        polgyon = (cls_, confidence, polygon)
+                        bbox_tuple = (cls_, confidence, bbox)
+                        polgyon_tuple = (cls_, confidence, polygon)
 
-                        self.polygons.append(polygon)
-                        self.bboxes.append(bbox)
+                        self.polygons.append(polgyon_tuple)
+                        self.bboxes.append(bbox_tuple)
 
         return self.bboxes, self.polygons

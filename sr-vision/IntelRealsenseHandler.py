@@ -111,30 +111,44 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
         else:
             return 0, 0, 0, 0, 0
 
-    def _get_centroid_pixel(self, bbox):
-        if len(bbox) == 4:
+    def _get_centroid_pixel(self, shape):
+        # Check if shape is a bbox or polygon
+        points = shape
+        if len(shape) == 4:
             # It's a bbox - make sure to close the loop
             points = np.array([
-                [bbox[0], bbox[1]],  # Top-left corner
-                [bbox[2], bbox[1]],  # Top-right corner
-                [bbox[2], bbox[3]],  # Bottom-right corner
-                [bbox[0], bbox[3]],  # Bottom-left corner
-                [bbox[0], bbox[1]]   # Back to Top-left corner to close the loop
+                [shape[0], shape[1]],  # Top-left corner
+                [shape[2], shape[1]],  # Top-right corner
+                [shape[2], shape[3]],  # Bottom-right corner
+                [shape[0], shape[3]],  # Bottom-left corner
+                [shape[0], shape[1]]   # Back to Top-left corner to close the loop
             ], dtype=np.int32)
-            points = points.reshape((-1, 1, 2))  # Reshape for OpenCV
+        
+        points = points.reshape((-1, 1, 2))  # Reshape for OpenCV
 
-            # Calculate the moments
-            M = cv2.moments(points)
-            # print(f"Moment calculation: {M}")
-            if M["m00"] > 0:
-                center_x = int(M["m10"] / M["m00"])
-                center_y = int(M["m01"] / M["m00"])
-                return center_x, center_y
-            else:
-                print("Calculated zero area for the shape.")
-        return None, None
+        # Calculate the moments
+        M = cv2.moments(points)
+        # print(f"Moment calculation: {M}")
+        if M["m00"] > 0:
+            center_x = int(M["m10"] / M["m00"])
+            center_y = int(M["m01"] / M["m00"])
+            return center_x, center_y
+        else:
+            print("Calculated zero area for the shape.")
+            return None, None
         
     def _get_depth_at_centroid(self, depth_frame, center_x, center_y):
+        """
+        Get the depth value at the centroid based on the provided depth_frame and centroid coordinates.
+
+        Parameters:
+            - depth_frame (rs.frame): Depth frame from the Intel Realsense camera.
+            - center_x (int): X-coordinate of the centroid.
+            - center_y (int): Y-coordinate of the centroid.
+
+        Returns:
+            Tuple: Depth value at the centroid, or None if no depth value is available, along with the camera coordinates.
+        """
         zxy_pose = None, None, None
         # Get depth value at centroid
         if depth_frame:

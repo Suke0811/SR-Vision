@@ -37,6 +37,7 @@ class FrameHandler(FrameHandlerBase):
         for cls_, confidence, polygon in polygons:
             # Extract depth at centroid
             depth, x, y, center_x, center_y = self.cam.get_3D_pose(depth_frame, polygon)
+            # print(f'Depth: {depth} X: {x} Y: {y}')
             position = np.array([[cls_, x, y, depth]])
             center = np.array([[center_x, center_y]])
             
@@ -60,6 +61,7 @@ class FrameHandler(FrameHandlerBase):
         - The frame with the applied changes
         """
         # Ensure polygons is iterable and of the same length as bboxes
+        # Modular to be used with both detectiona and segmentation  
         if polygons is None:
             polygons = [None] * len(bboxes)
 
@@ -68,14 +70,14 @@ class FrameHandler(FrameHandlerBase):
                 for position, center, box, polygon in zip(self.positions, self.center_xy, bboxes, polygons):
                     center_3d = self._get_3d_coordinates(position)
                     center_x, center_y = self._get_centroid_pixel(center)
-                    id_, confidence, bbox = self._unpack_box(box)
+                    id_, confidence, bbox = self._unpack_shape(box)
                     current_class_name = self._get_class_name(id_)
                     self._draw_bounding_box(frame, bbox)
                     label = self._create_label(current_class_name, confidence, center_3d)
 
                     # Only draw the polygon if it is not None
                     if polygon is not None:
-                        self._unpack_shape(polygon)
+                        _, _, polygon = self._unpack_shape(polygon)
                         self._draw_segmentation_polygon(frame, polygon)
 
                     self._draw_centroid(frame, center_x, center_y)

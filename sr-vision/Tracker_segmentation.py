@@ -3,6 +3,7 @@ from IntelRealsenseHandler import IntelRealsenseHandler
 from SegmentationHandler import SegmentationHandler
 import numpy as np
 import cv2
+import traceback
 
 class Tracker:
     def __init__(self, model_path, log=False, display=True):
@@ -13,7 +14,7 @@ class Tracker:
         self.frame_handler = FrameHandler(self.camera, self._classes)
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.display = display
-        print(f"DISPLAY IS {self.display}")
+        print(f"Display is {self.display}")
         self.log = log
         self.run = True
     
@@ -30,9 +31,11 @@ class Tracker:
         while self.run:
             try:
                 self.update()
+                
             except Exception as e:
                 print('HITTING EXCEPTION')
                 print(f"Error: {e}")
+                print(traceback.format_exc())
                 # self.run = False
     
     def stop (self):
@@ -52,6 +55,7 @@ class Tracker:
         bboxes, polygons = self.segmenter.segmentation(color_frame)
         self.positions = self.frame_handler.get_xyz(depth_frame, polygons)
         self._dispaly_frame(self.display, color_frame, bboxes, polygons)
+
     @property
     def classes(self):
         return self._classes
