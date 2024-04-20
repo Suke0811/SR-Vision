@@ -12,7 +12,7 @@ class Tracker:
         # this is used inside frame handler
         self.classes_ = []
         self.colors_ = {}
-        self.frame_handler = FrameHandler(self.camera, self._classes)
+        self.frame_handler = FrameHandler(self.camera, self.classes_)
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.display = display
         print(f"Display is {self.display}")
