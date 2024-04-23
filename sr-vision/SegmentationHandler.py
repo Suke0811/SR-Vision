@@ -68,7 +68,7 @@ class SegmentationHandler(SegmentationHandlerBase):
     '''Processors:'''
     def _process_model(self, frame):
         # run model to get results
-        self.results = self.model(frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf, verbose=self._log)
+        self.results = self.model(frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf, verbose=self._log, half=True)
 
         # reset bboxes and polygons list
         self.bboxes = []

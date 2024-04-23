@@ -88,10 +88,13 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
                 return None, None
         
         except RuntimeError as e:
-            print(f"RuntimeError occurred: {e}")
-            return None, None
-
-    
+            # Specifically ignore null pointer exceptions silently
+            # This is known and will spam during poll_for_frames() wait time
+            if "null pointer passed for argument 'frame'" in str(e):
+                return None, None
+            else:
+                raise  # Re-throw exception if it's not the handled type
+        
     def get_3D_pose(self, depth_frame, shape):
         """
         Calculate the centroid of a given shape (either bbox or polygon) and retrieve the depth value at the centroid.
