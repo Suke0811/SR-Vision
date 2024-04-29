@@ -1,12 +1,13 @@
 from Tracker_segmentation import Tracker
 from pathlib import Path
 import traceback
+import torch
 
 def main():
     base_path = Path(__file__).resolve().parent
-    model_path = str(base_path / "weights" / "yolov8m-seg.pt")
+    model_path = str(base_path / "weights" / "slide1-3-tune6.pt")
     # print(f"Model path: {model_path}")
-    tracker = Tracker(model_path, log=False, display=True)
+    tracker = Tracker(model_path, log=True, display=True)
 
     try:
         tracker.run_model()
