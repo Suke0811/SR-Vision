@@ -1,4 +1,4 @@
-from Tracker_segmentation import Tracker
+from TrackerDetection import TrackerDetection as Tracker
 from pathlib import Path
 import traceback
 

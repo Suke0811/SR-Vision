@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 import traceback
 
-class Tracker:
+class TrackerDetection:
     
     def __init__(self, model_path, log=False, display=False):
         self.detector = DetectionHander(model_path, log, display)

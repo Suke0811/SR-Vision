@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 import traceback
 
-class Tracker:
+class TrackerSegmentation:
     def __init__(self, model_path, log=False, display=True):
         self.segmenter = SegmentationHandler(model_path, log, display)
         self.camera = IntelRealsenseHandler()
