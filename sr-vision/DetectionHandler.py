@@ -62,7 +62,7 @@ class DetectionHander():
     '''Processors:'''
     def _process_model(self, frame):
         # run model to get results
-        self.results = self.model(frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf, verbose=self._log)
+        self.results = self.model(frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf, verbose=self._log, half=True, device='cpu')
 
         # reset bboxes 
         self.bboxes = []
