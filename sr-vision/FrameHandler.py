@@ -3,6 +3,7 @@ from IntelRealsenseHandler import IntelRealsenseHandler
 from DetectionHandler import DetectionHander
 import cv2
 import numpy as np
+import traceback
 
 
 class FrameHandler(FrameHandlerBase):
@@ -73,20 +74,20 @@ class FrameHandler(FrameHandlerBase):
                     center_x, center_y = self._get_centroid_pixel(center)
                     id_, confidence, bbox = self._unpack_shape(box)
                     current_class_name = self._get_class_name(id_)
-                    self._draw_bounding_box(frame, bbox)
+                    self._draw_bounding_box(frame, current_class_name, bbox)
                     label = self._create_label(current_class_name, confidence, center_3d)
 
                     # Only draw the polygon if it is not None
                     if polygon is not None:
                         _, _, polygon = self._unpack_shape(polygon)
-                        self._draw_segmentation_polygon(frame, polygon)
+                        self._draw_segmentation_polygon(frame, current_class_name, polygon)
 
-                    self._draw_centroid(frame, center_x, center_y)
-                    self._draw_label(frame, bbox, label)
+                    self._draw_centroid(frame, current_class_name, center_x, center_y)
+                    self._draw_label(frame, current_class_name, bbox, label)
 
             except Exception as e:
-                # print(e)
-                # print(f'Position: {self.positions}, Center: {self.center_xy}, Box: {bboxes}, Polygons: {polygons}')
+                print(e)
+                print(traceback.format_exc())
                 pass
         return frame
 
@@ -109,21 +110,21 @@ class FrameHandler(FrameHandlerBase):
             return "???"
 
 
-    def _draw_bounding_box(self, frame, bbox):
+    def _draw_bounding_box(self, frame, class_name, bbox):
         x1, y1, x2, y2 = bbox
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.rectangle(frame, (x1, y1), (x2, y2), self._colors[class_name], 2)
 
     def _create_label(self, class_name, confidence, center_3d):
         xyz_label = f"X: {center_3d[0]:.2f}, Y: {center_3d[1]:.2f}, Z: {center_3d[2]:.2f}"
         return f"{class_name} {confidence:.2f} ({xyz_label})"
 
-    def _draw_segmentation_polygon(self, frame, polygon):
-        cv2.polylines(frame, [np.array(polygon, dtype=np.int32)], isClosed=True, color=(255, 0, 255), thickness=2)
+    def _draw_segmentation_polygon(self, frame, class_name, polygon):
+        cv2.polylines(frame, [np.array(polygon, dtype=np.int32)], isClosed=True, color=self._colors[class_name], thickness=2)
 
-    def _draw_centroid(self, frame, center_x, center_y):
+    def _draw_centroid(self, frame, class_name, center_x, center_y):
         cv2.circle(frame, (center_x, center_y), 5, (0, 0, 255), -1)
 
-    def _draw_label(self, frame, bbox, label):
+    def _draw_label(self, frame, class_name, bbox, label):
         x1, y1, _, _ = bbox
         (label_width, label_height), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
         
@@ -133,7 +134,7 @@ class FrameHandler(FrameHandlerBase):
             label_y_position = y1 + label_height - baseline + 6
             box_y_position = y1 + label_height + baseline
         
-        cv2.rectangle(frame, (x1, box_y_position), (x1 + label_width, y1), (0, 255, 0), cv2.FILLED)
+        cv2.rectangle(frame, (x1, box_y_position), (x1 + label_width, y1), self._colors[class_name], cv2.FILLED)
         cv2.putText(frame, label, (x1, label_y_position), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
         
         

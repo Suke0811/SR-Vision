@@ -7,13 +7,13 @@ import traceback
 import time
 
 class TrackerSegmentation:
-    def __init__(self, model_path, log=False, display=True):
+    def __init__(self, model_path, classes=[], colors={}, log=False, display=True):
         self.segmenter = SegmentationHandler(model_path, log, display)
         self.camera = IntelRealsenseHandler()
         # This is used inside frame handler
-        self.classes_ = []
-        self.colors_ = {}
-        self.frame_handler = FrameHandler(self.camera, self.classes_)
+        self.classes_ = classes
+        self.colors_ = colors
+        self.frame_handler = FrameHandler(self.camera, self.classes_, self.colors_)
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.display = display
         print(f"Display is {self.display}")
