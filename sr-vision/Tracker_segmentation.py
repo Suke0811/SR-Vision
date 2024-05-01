@@ -4,6 +4,7 @@ from SegmentationHandler import SegmentationHandler
 import numpy as np
 import cv2
 import traceback
+import time
 
 class Tracker:
     def __init__(self, model_path, log=False, display=True):
@@ -31,7 +32,10 @@ class Tracker:
         self.camera.start_camera()
         while self.run:
             try:
+                start_time = time.perf_counter()
                 self.update()
+                end_time = time.perf_counter()
+                print(f"Time taken: {end_time - start_time}")
 
             except Exception as e:
                 print('HITTING EXCEPTION')

@@ -5,7 +5,7 @@ import torch
 
 def main():
     base_path = Path(__file__).resolve().parent
-    model_path = str(base_path / "weights" / "slide1-3-tune6.pt")
+    model_path = str(base_path / "weights" / "slide2-1-tune20.pt")
     # print(f"Model path: {model_path}")
     tracker = Tracker(model_path, log=True, display=True)
 
