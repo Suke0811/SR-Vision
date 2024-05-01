@@ -1,4 +1,4 @@
-from TrackerSegmentation import TrackerSegmentation
+from TrackerDetection import TrackerDetection as Tracker
 from pathlib import Path
 import traceback
 import torch
@@ -8,7 +8,7 @@ def main():
     # model_path = str(base_path / "weights" / "slide2-1-tune20.onnx")
     model_path = str(base_path / "weights" / "slideS3-1-tune8.pt")
     # print(f"Model path: {model_path}")
-    tracker = TrackerSegmentation(model_path, log=True, display=True)
+    tracker = Tracker(model_path, log=True, display=True)
 
     try:
         tracker.run_model()
