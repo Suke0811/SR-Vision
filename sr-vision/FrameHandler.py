@@ -86,8 +86,8 @@ class FrameHandler(FrameHandlerBase):
                     self._draw_label(frame, current_class_name, bbox, label)
 
             except Exception as e:
-                print(e)
-                print(traceback.format_exc())
+                # print(e)
+                # print(traceback.format_exc())
                 pass
         return frame
 
@@ -119,7 +119,8 @@ class FrameHandler(FrameHandlerBase):
         return f"{class_name} {confidence:.2f} ({xyz_label})"
 
     def _draw_segmentation_polygon(self, frame, class_name, polygon):
-        cv2.polylines(frame, [np.array(polygon, dtype=np.int32)], isClosed=True, color=self._colors[class_name], thickness=2)
+        # cv2.polylines(frame, [np.array(polygon, dtype=np.int32)], isClosed=True, color=self._colors[class_name], thickness=2)
+        cv2.polylines(frame, [np.array(polygon, dtype=np.int32)], isClosed=True, color=(255, 0, 255), thickness=2)
 
     def _draw_centroid(self, frame, class_name, center_x, center_y):
         cv2.circle(frame, (center_x, center_y), 5, (0, 0, 255), -1)

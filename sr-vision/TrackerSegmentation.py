@@ -7,8 +7,13 @@ import traceback
 import time
 
 class TrackerSegmentation:
-    def __init__(self, model_path, classes=[], colors={}, log=False, display=True):
-        self.segmenter = SegmentationHandler(model_path, log, display)
+    def __init__(self, model_path, classes=[], colors={}, log=False, display=True, max_model_size=640, det_conf=0.2, iou=0.6, *args, **kwargs):
+        self.segmenter = SegmentationHandler(model_path=model_path,
+                                             log=log, 
+                                             display=display,
+                                             max_model_size=max_model_size,
+                                             det_conf=det_conf,
+                                             iou=iou)
         self.camera = IntelRealsenseHandler()
         # This is used inside frame handler
         self.classes_ = classes
@@ -35,7 +40,8 @@ class TrackerSegmentation:
                 start_time = time.perf_counter()
                 self.update()
                 end_time = time.perf_counter()
-                print(f"Time taken: {end_time - start_time}")
+                if self.log:
+                    print(f"Time taken: {end_time - start_time}")
 
             except Exception as e:
                 print('HITTING EXCEPTION')
