@@ -6,8 +6,8 @@ import cv2
 import traceback
 
 class TrackerSegmentation:
-    def __init__(self, model_path, log=False, display=True):
-        self.segmenter = SegmentationHandler(model_path, log, display)
+    def __init__(self, model_path, det_conf=0.2, log=False, display=True):
+        self.segmenter = SegmentationHandler(model_path, log, display, det_conf=det_conf)
         self.camera = IntelRealsenseHandler()
         # This is used inside frame handler
         self.classes_ = []

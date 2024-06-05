@@ -6,7 +6,7 @@ def main():
     base_path = Path(__file__).resolve().parent
     model_path = str(base_path / "weights" / "yolov8s-seg.pt")
     # print(f"Model path: {model_path}")
-    tracker = Tracker(model_path, log=False, display=True)
+    tracker = Tracker(model_path, log=False, display=True, det_conf=0.6)
 
     try:
         tracker.run_model()
