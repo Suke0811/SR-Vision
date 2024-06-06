@@ -7,12 +7,12 @@ import traceback
 
 
 class FrameHandler(FrameHandlerBase):
-    def __init__(self, camera, classes=[], colors={},*args, **kwargs):
+    def __init__(self, camera, classes=None, colors=None,*args, **kwargs):
         self.cam = camera
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.center_xy = np.empty((0, 2), dtype=np.float32)  
-        self._classes = classes
-        self._colors = colors
+        self._classes = classes if classes is not None else []
+        self._colors = colors if colors is not None else {}
     
     def get_xyz(self, depth_frame, polygons, *args, **kwargs):
         return self._get_positions(depth_frame, polygons)
@@ -104,15 +104,23 @@ class FrameHandler(FrameHandlerBase):
         return id_, confidence, _shape
 
     def _get_class_name(self, id_):
+        if not self._classes:
+            return "???"
         try:
             return self._classes[id_]
         except IndexError:
             return "???"
 
+    def _get_class_color(self, class_name):
+        if not self._colors:
+            return (0, 255, 0)
+        return self._colors.get(class_name, (255, 255, 255))
+
 
     def _draw_bounding_box(self, frame, class_name, bbox):
         x1, y1, x2, y2 = bbox
-        cv2.rectangle(frame, (x1, y1), (x2, y2), self._colors[class_name], 2)
+        class_color =self._get_class_color(class_name)
+        cv2.rectangle(frame, (x1, y1), (x2, y2), class_color, 2)
 
     def _create_label(self, class_name, confidence, center_3d):
         xyz_label = f"X: {center_3d[0]:.2f}, Y: {center_3d[1]:.2f}, Z: {center_3d[2]:.2f}"
@@ -127,6 +135,7 @@ class FrameHandler(FrameHandlerBase):
 
     def _draw_label(self, frame, class_name, bbox, label):
         x1, y1, _, _ = bbox
+        class_color = self._get_class_color(class_name)
         (label_width, label_height), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
         
         label_y_position = y1 - label_height + baseline + 4
@@ -135,7 +144,7 @@ class FrameHandler(FrameHandlerBase):
             label_y_position = y1 + label_height - baseline + 6
             box_y_position = y1 + label_height + baseline
         
-        cv2.rectangle(frame, (x1, box_y_position), (x1 + label_width, y1), self._colors[class_name], cv2.FILLED)
+        cv2.rectangle(frame, (x1, box_y_position), (x1 + label_width, y1), class_color, cv2.FILLED)
         cv2.putText(frame, label, (x1, label_y_position), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
         
         

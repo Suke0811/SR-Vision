@@ -7,7 +7,7 @@ import traceback
 import time
 
 class TrackerSegmentation:
-    def __init__(self, model_path, classes=[], colors={}, log=False, display=True, max_model_size=640, det_conf=0.2, iou=0.6, *args, **kwargs):
+    def __init__(self, model_path, classes=None, colors=None, log=False, display=True, max_model_size=640, det_conf=0.2, iou=0.6, *args, **kwargs):
         self.segmenter = SegmentationHandler(model_path=model_path,
                                              log=log, 
                                              display=display,
@@ -16,8 +16,8 @@ class TrackerSegmentation:
                                              iou=iou)
         self.camera = IntelRealsenseHandler()
         # This is used inside frame handler
-        self.classes_ = classes
-        self.colors_ = colors
+        self.classes_ = classes if classes is not None else []
+        self.colors_ = colors if colors is not None else {}
         self.frame_handler = FrameHandler(self.camera, self.classes_, self.colors_)
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.display = display

@@ -10,7 +10,7 @@ def main():
     # print(f"Model path: {model_path}")
     classes = [] # list for class labels e.g.('shiba')
     colors = {} # dict for class label colors e.g.{'shiba': (255, 0, 0)}
-    tracker = Tracker(model_path, classes=classes, colors=colors, log=False, display=True)
+    tracker = Tracker(model_path, log=False, display=True)
 
     try:
         tracker.run_model()
