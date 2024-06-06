@@ -4,15 +4,21 @@ from SegmentationHandler import SegmentationHandler
 import numpy as np
 import cv2
 import traceback
+import time
 
 class TrackerSegmentation:
-    def __init__(self, model_path, det_conf=0.2, log=False, display=True):
-        self.segmenter = SegmentationHandler(model_path, log, display, det_conf=det_conf)
+    def __init__(self, model_path, classes=[], colors={}, log=False, display=True, max_model_size=640, det_conf=0.2, iou=0.6, *args, **kwargs):
+        self.segmenter = SegmentationHandler(model_path=model_path,
+                                             log=log, 
+                                             display=display,
+                                             max_model_size=max_model_size,
+                                             det_conf=det_conf,
+                                             iou=iou)
         self.camera = IntelRealsenseHandler()
         # This is used inside frame handler
-        self.classes_ = []
-        self.colors_ = {}
-        self.frame_handler = FrameHandler(self.camera, self.classes_)
+        self.classes_ = classes
+        self.colors_ = colors
+        self.frame_handler = FrameHandler(self.camera, self.classes_, self.colors_)
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.display = display
         print(f"Display is {self.display}")
@@ -31,7 +37,11 @@ class TrackerSegmentation:
         self.camera.start_camera()
         while self.run:
             try:
+                start_time = time.perf_counter()
                 self.update()
+                end_time = time.perf_counter()
+                if self.log:
+                    print(f"Time taken: {end_time - start_time}")
 
             except Exception as e:
                 print('HITTING EXCEPTION')

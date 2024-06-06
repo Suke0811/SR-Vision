@@ -7,7 +7,7 @@ import time
 from ultralytics import YOLO
 
 class SegmentationHandler(SegmentationHandlerBase):
-    def __init__(self, model_path, log=False, display=False, max_model_size=640, det_conf=0.2, *args, **kwargs):
+    def __init__(self, model_path, log=False, display=False, max_model_size=640, det_conf=0.2, iou=0.6, *args, **kwargs):
         # init model variables
         self.base_dir = Path(__file__).resolve().parent
         self.model_path = model_path
@@ -15,6 +15,7 @@ class SegmentationHandler(SegmentationHandlerBase):
         self.results = None
         self.max_model_size = max_model_size
         self.det_conf = det_conf
+        self.iou = iou
 
         # list of positions based on inference results
         self._positions = np.empty((0, 4), dtype=np.float32)
