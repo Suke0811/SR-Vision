@@ -8,8 +8,8 @@ def main():
     base_path = Path(__file__).resolve().parent
     model_path = str(base_path / "weights" / "yolov8s-seg.pt")
     # print(f"Model path: {model_path}")
-    classes = ['handle', 'stair']
-    colors = {'handle': (255, 0, 0), 'stair': (0, 255, 0)}
+    classes = [] # list for class labels e.g.('shiba')
+    colors = {} # dict for class label colors e.g.{'shiba': (255, 0, 0)}
     tracker = Tracker(model_path, classes=classes, colors=colors, log=False, display=True)
 
     try:
