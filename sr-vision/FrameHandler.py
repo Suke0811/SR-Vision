@@ -64,7 +64,7 @@ class FrameHandler(FrameHandlerBase):
         """
         # Ensure polygons is iterable and of the same length as bboxes
         # Modular to be used with both detectiona and segmentation  
-        if polygons is None:
+        if polygons is None and bboxes is not None:
             polygons = [None] * len(bboxes)
 
         if bboxes is not None:
@@ -72,14 +72,14 @@ class FrameHandler(FrameHandlerBase):
                 for position, center, box, polygon in zip(self.positions, self.center_xy, bboxes, polygons):
                     center_3d = self._get_3d_coordinates(position)
                     center_x, center_y = self._get_centroid_pixel(center)
-                    id_, confidence, bbox = self._unpack_shape(box)
+                    id_, confidence, bbox = box
                     current_class_name = self._get_class_name(id_)
                     self._draw_bounding_box(frame, current_class_name, bbox)
                     label = self._create_label(current_class_name, confidence, center_3d)
 
                     # Only draw the polygon if it is not None
                     if polygon is not None:
-                        _, _, polygon = self._unpack_shape(polygon)
+                        _, _, polygon = polygon
                         self._draw_segmentation_polygon(frame, current_class_name, polygon)
 
                     self._draw_centroid(frame, current_class_name, center_x, center_y)
@@ -98,10 +98,6 @@ class FrameHandler(FrameHandlerBase):
     def _get_centroid_pixel(self, center):
         center_x, center_y = int(center[0]), int(center[1])
         return center_x, center_y
-
-    def _unpack_shape(self, shape):
-        id_, confidence, _shape = shape
-        return id_, confidence, _shape
 
     def _get_class_name(self, id_):
         if not self._classes:

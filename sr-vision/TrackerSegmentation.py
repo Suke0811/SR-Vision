@@ -16,9 +16,9 @@ class TrackerSegmentation:
                                              iou=iou)
         self.camera = IntelRealsenseHandler()
         # This is used inside frame handler
-        self.classes_ = classes if classes is not None else []
-        self.colors_ = colors if colors is not None else {}
-        self.frame_handler = FrameHandler(self.camera, self.classes_, self.colors_)
+        self._classes = classes if classes is not None else []
+        self._colors = colors if colors is not None else {}
+        self.frame_handler = FrameHandler(self.camera, self._classes, self._colors)
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.display = display
         print(f"Display is {self.display}")
@@ -72,16 +72,16 @@ class TrackerSegmentation:
 
     @property
     def classes(self):
-        return self.classes_
+        return self._classes
     
     @classes.setter
     def classes(self, classes):
-        self.classes_ = classes
+        self._classes = classes
     
     @property
     def colors(self):
-        return self.colors_
+        return self._colors
     
     @colors.setter
     def colors(self, colors):
-        self.colors_ = colors
+        self._colors = colors

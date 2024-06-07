@@ -1,5 +1,4 @@
 from TrackerSegmentation import TrackerSegmentation as Tracker
-from TrackerSegmentation import TrackerSegmentation as Tracker
 from pathlib import Path
 import traceback
 import torch

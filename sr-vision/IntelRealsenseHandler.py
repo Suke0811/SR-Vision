@@ -116,7 +116,6 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
 
     def _get_centroid_pixel(self, shape):
         # Check if shape is a bbox or polygon
-        points = shape
         if len(shape) == 4:
             # It's a bbox - make sure to close the loop
             points = np.array([
@@ -127,7 +126,7 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
                 [shape[0], shape[1]]   # Back to Top-left corner to close the loop
             ], dtype=np.int32)
         
-        points = points.reshape((-1, 1, 2))  # Reshape for OpenCV
+        points = shape.reshape((-1, 1, 2))  # Reshape for OpenCV
 
         # Calculate the moments
         M = cv2.moments(points)
@@ -167,7 +166,7 @@ class IntelRealsenseHandler(IntelRealsenseHandlerBase):
                 z = depth_point[2]
                 # flip y so up is positive
                 # z = z - 0.0042 # slight camera offset for camera to lens protector
-                zxy_pose = z, x, -y
+                zxy_pose = z, x, y
         # Return the depth, x, and y coordinates
         return zxy_pose
         
