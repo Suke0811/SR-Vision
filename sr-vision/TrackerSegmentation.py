@@ -33,6 +33,30 @@ class TrackerSegmentation:
         self.camera.stop_camera()
         cv2.destroyAllWindows()
         
+    
+    def stop (self):
+        self.run = False
+
+    def _dispaly_frame(self, display, color_frame, bboxes, polygons):
+        if display:
+            display_frame = self.frame_handler.display_data(color_frame, bboxes, polygons)
+            cv2.imshow('Segmentation Inference', display_frame)
+            cv2.waitKey(1)
+    
+    def start_camera(self):
+        self.camera.start_camera()
+    
+    def update(self):
+        """
+        Updates object state by retrieving frames, performing segmentation, and displaying if set to True.
+        """
+        depth_frame, color_frame = self.camera.get_frames(wait=True)
+        # Check if depth and color frames are available
+        if depth_frame is not None and color_frame is not None:    
+            bboxes, polygons = self.segmenter.segmentation(color_frame)
+            self.positions = self.frame_handler.get_xyz(depth_frame, polygons)
+            self._dispaly_frame(self.display, color_frame, bboxes, polygons)
+
     def run_model(self):
         self.camera.start_camera()
         while self.run:
@@ -49,26 +73,6 @@ class TrackerSegmentation:
                 print(traceback.format_exc())
                 # self.run = False
                 pass
-    
-    def stop (self):
-        self.run = False
-
-    def _dispaly_frame(self, display, color_frame, bboxes, polygons):
-        if display:
-            display_frame = self.frame_handler.display_data(color_frame, bboxes, polygons)
-            cv2.imshow('Segmentation Inference', display_frame)
-            cv2.waitKey(1)
-    
-    def update(self):
-        """
-        Updates object state by retrieving frames, performing segmentation, and displaying if set to True.
-        """
-        depth_frame, color_frame = self.camera.get_frames(wait=True)
-        # Check if depth and color frames are available
-        if depth_frame is not None and color_frame is not None:    
-            bboxes, polygons = self.segmenter.segmentation(color_frame)
-            self.positions = self.frame_handler.get_xyz(depth_frame, polygons)
-            self._dispaly_frame(self.display, color_frame, bboxes, polygons)
 
     @property
     def classes(self):
@@ -85,3 +89,6 @@ class TrackerSegmentation:
     @colors.setter
     def colors(self, colors):
         self._colors = colors
+
+    def get_positions(self):
+        return self.positions
