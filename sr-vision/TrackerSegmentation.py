@@ -21,6 +21,7 @@ class TrackerSegmentation:
         self.frame_handler = FrameHandler(self.camera, self._classes, self._colors)
         self.positions = np.empty((0, 4), dtype=np.float32)
         self.display = display
+        self.display_frame = None
         print(f"Display is {self.display}")
         self.log = log
         self.run = True
@@ -37,10 +38,10 @@ class TrackerSegmentation:
     def stop (self):
         self.run = False
 
-    def _dispaly_frame(self, display, color_frame, bboxes, polygons):
-        if display:
-            display_frame = self.frame_handler.display_data(color_frame, bboxes, polygons)
-            cv2.imshow('Segmentation Inference', display_frame)
+    def _display_frame(self, color_frame, bboxes, polygons):
+        if self.display:
+            self.display_frame = self.frame_handler.display_data(color_frame, bboxes, polygons)
+            cv2.imshow('Segmentation Inference', self.display_frame)
             cv2.waitKey(1)
     
     def start_camera(self):
@@ -55,7 +56,7 @@ class TrackerSegmentation:
         if depth_frame is not None and color_frame is not None:    
             bboxes, polygons = self.segmenter.segmentation(color_frame)
             self.positions = self.frame_handler.get_xyz(depth_frame, polygons)
-            self._dispaly_frame(self.display, color_frame, bboxes, polygons)
+            self._display_frame( color_frame, bboxes, polygons)
 
     def run_model(self):
         self.camera.start_camera()
@@ -92,3 +93,6 @@ class TrackerSegmentation:
 
     def get_positions(self):
         return self.positions
+    
+    def get_display_frame(self):
+        return self.display_frame

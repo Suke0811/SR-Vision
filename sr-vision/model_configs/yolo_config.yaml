@@ -1,6 +1,8 @@
-model_path: "weights/yolov8s-seg.pt"
-classes: []  # list for class labels e.g.('shiba')
-colors: {}   # dict for class label colors e.g.{'shiba': (255, 0, 0)}
+model_path: "weights/slideS2-1-tune23.pt"
+classes: ['handle', 'stair']  # list for class labels e.g.('shiba')
+colors: 
+  handle: [255, 0, 0]
+  stair: [0, 255, 0]
 log: false
 display: true
 max_model_size: 640
