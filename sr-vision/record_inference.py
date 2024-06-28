@@ -13,7 +13,7 @@ def load_config(config_path):
 def main():
     base_path = Path(__file__).resolve().parent
     config_path = str(base_path / 'model_configs' / 'yolo_config.yaml')
-    output_path = str(base_path / 'record' / 'inference.avi')
+    output_path = str(base_path / 'record' / 'inference2.avi')
     
     config = load_config(config_path)
     
@@ -23,7 +23,7 @@ def main():
     # Create tracker instance with config parameters
     tracker = Tracker(**config)
 
-    recorder = InferenceRecorder(fps=15.0)
+    recorder = InferenceRecorder(fps=30.0)
 
     try:
         tracker.start_camera()
