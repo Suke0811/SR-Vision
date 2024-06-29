@@ -5,13 +5,20 @@ from pathlib import Path
 import torch
 import time
 from ultralytics import YOLO
+from deepsparse import Pipeline
 
 class SegmentationHandler(SegmentationHandlerBase):
     def __init__(self, model_path, log=False, display=False, max_model_size=640, det_conf=0.2, iou=0.6, *args, **kwargs):
         # init model variables
         self.base_dir = Path(__file__).resolve().parent
         self.model_path = model_path
-        self.model = YOLO(self.model_path)
+        # self.model = YOLO(self.model_path)
+        self.pipeline = Pipeline.create(
+            task="yolo",
+            model_path=model_path,
+            iou_thres=iou,
+            conf_thres=det_conf
+        )
         self.results = None
         self.max_model_size = max_model_size
         self.det_conf = det_conf
@@ -69,7 +76,8 @@ class SegmentationHandler(SegmentationHandlerBase):
     '''Processors:'''
     def _process_model(self, frame):
         # run model to get results
-        self.results = self.model(frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf, verbose=self._log)
+        # self.results = self.model(frame, imgsz=(self.max_model_size), stream=True, conf=self.det_conf, verbose=self._log)
+        self.results = self.pipeline(images=frame)
 
         # reset bboxes and polygons list
         self.bboxes = []

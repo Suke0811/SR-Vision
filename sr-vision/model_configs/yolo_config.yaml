@@ -1,4 +1,4 @@
-model_path: "weights/slideS2-1-tune23.pt"
+model_path: "weights/slideS2-1-tune23.onnx"
 classes: ['handle', 'stair']  # list for class labels e.g.('shiba')
 colors: 
   handle: [255, 0, 0]
