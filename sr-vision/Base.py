@@ -3,8 +3,14 @@ DEFAULT_TIMEOUT = 100
 
 class IntelRealsenseHandlerBase:
     def __init__(self, timeout=DEFAULT_TIMEOUT, *args, **kwargs):
-        self.pipe = None
-        self.timeout = timeout
+         # Variable to hold camera intrinsics
+        self._intrinsics = None
+        self._wait = True # use poll for frames or wait for frames
+        self.timeout = DEFAULT_TIMEOUT
+        
+        # np arrays for both depth and color images
+        self._depth_frame = None
+        self._color_frame = None
         pass
 
     def init(self):
@@ -49,10 +55,11 @@ class FrameHandlerBase:
     def __init__(self, *args, **kwargs):
         pass
 
-    def frame_to_xyz(self, frame, depth, *args, **kwargs):
+    # polygons is the array of points for the segmentation mask
+    def get_xyz(self, depth_frame, polygons, *args, **kwargs):
         raise NotImplementedError
 
-    def frame_to_distance(self, norm: int=2):
+    def get_depth(self, norm: int=2):
         raise NotImplementedError
 
 
