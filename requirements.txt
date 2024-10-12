@@ -1,2 +1,9 @@
 pyrealsense2<2.54
 numpy
+pathlib
+ultralytics
+opencv-python
+torch
+torchvision
+torchaudio
+pyyaml
